@@ -38,6 +38,10 @@ void setup() {
   servo7.write(0);
   servo8.write(0);
 
+  stepper1.setMaxSpeed(DEFAULT_MAX_SPEED);
+  stepper1.setAcceleration(DEFAULT_MAX_ACCEL);
+  stepper1.setMaxSpeed(DEFAULT_MAX_SPEED);
+  stepper1.setAcceleration(DEFAULT_MAX_ACCEL);
   pinMode(PIN_STEPPER_ENABLE_1, OUTPUT);
   pinMode(PIN_STEPPER_ENABLE_2, OUTPUT);
   digitalWrite(PIN_STEPPER_ENABLE_1,HIGH);

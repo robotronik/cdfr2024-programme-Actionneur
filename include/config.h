@@ -51,3 +51,8 @@
 #define PIN_CAPTEUR_8 39
 
 
+//configuration Stepper
+#define DEFAULT_MAX_SPEED 6000  // Vitesse maximale (en pas par seconde)
+#define DEFAULT_MAX_ACCEL 5000 // Accélération maximale (en pas par seconde carré)
+
+

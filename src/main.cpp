@@ -3,6 +3,7 @@
 #include <Servo.h>
 #include <Wire.h>
 #include "config.h"
+#include "conversionArray.h"
 
 
 
@@ -19,6 +20,10 @@ Servo servo6;
 Servo servo7;
 Servo servo8;
 
+uint8_t onRequestData[BUFFERONREQUESTSIZE];
+
+void receiveEvent(int numBytes);
+void requestEvent();
 
 void setup() {
   servo1.attach(PIN_SERVOMOTEUR_1);
@@ -75,13 +80,50 @@ void setup() {
   Serial.begin(115200);
   Wire.begin(100);
   Wire.setTimeout(1000);
+  Wire.onReceive(receiveEvent);
+  Wire.onRequest(requestEvent);
 }
 
 void loop() {
   stepper1.run();
   stepper2.run();
 
+}
+
+
+void receiveEvent(int numBytes) {
+  uint8_t onReceiveData[BUFFERONRECEIVESIZE];
+  int i = 0;
+  while (Wire.available() > 0) { // Tant qu'il y a des données disponibles
+    if(i<BUFFERONRECEIVESIZE){
+      onReceiveData[i] = Wire.read(); // Lecture du caractère reçu
+      i++;
+    }
+    else{
+      Wire.read();
+    }
+   
+  }
+
+  int commande;
+  arrayToParameter(onReceiveData,BUFFERONREQUESTSIZE,"1%d",&commande);
+
+  switch (commande)
+  {
+  case 1 :
+    int position;
+    arrayToParameter(onRequestData+1,BUFFERONREQUESTSIZE,"2%d",&position);
+    servo1.write(position);
+    break;
+
+  case 2 :
+    break;
   
+  default:
+    break;
+  }
+}
 
-
+void requestEvent(){
+  Wire.write(onRequestData, BUFFERONREQUESTSIZE);
 }

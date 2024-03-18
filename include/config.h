@@ -2,6 +2,8 @@
 
 #include "Arduino.h"
 
+#define BUFFERONREQUESTSIZE 32
+#define BUFFERONRECEIVESIZE 32
 
 //Pin Servo moteur
 #define PIN_SERVOMOTEUR_1 7

@@ -21,6 +21,7 @@ Servo servo7;
 Servo servo8;
 
 uint8_t onRequestData[BUFFERONREQUESTSIZE];
+int lenghtOnRequest;
 
 void receiveEvent(int numBytes);
 void requestEvent();
@@ -95,13 +96,9 @@ void loop() {
 void receiveEvent(int numBytes) {
   uint8_t onReceiveData[BUFFERONRECEIVESIZE];
   int i = 0;
-  Serial.println("startInterupt");
-  while (Wire.available() > 0) { // Tant qu'il y a des données disponibles
+  while (Wire.available() > 0) {
     if(i<BUFFERONRECEIVESIZE){
-      uint8_t test;
-      test = Wire.read();
-      Serial.println(test);
-      onReceiveData[i] = test;  // Lecture du caractère reçu
+      onReceiveData[i] = Wire.read();
       i++;
     }
     else{
@@ -110,33 +107,39 @@ void receiveEvent(int numBytes) {
    
   }
 
-    Serial.println(onReceiveData[0]);
-    Serial.println(onReceiveData[1]);
-    Serial.println(onReceiveData[2]);
-    Serial.println();
-
   int commande;
-  arrayToParameter(onReceiveData,BUFFERONREQUESTSIZE,"1%d",&commande);
+  arrayToParameter(onReceiveData,BUFFERONRECEIVESIZE,"1%d",&commande);
 
   switch (commande)
   {
-  case 1 :
-    int position = 0;
-    arrayToParameter(onReceiveData+1,BUFFERONREQUESTSIZE,"2%d",&position);
+  case 1 :{
+    int position = 0; 
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     if(position<20){
       position = 20;
     }
     servo1.write(position);
     break;
+  }
 
   case 2 :
     break;
-  
+
+  case 100 :
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_1));
+    lenghtOnRequest = 2;
+    break;
+
+  case 101 :
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_2));
+    lenghtOnRequest = 2;
+    break;
+
   default:
     break;
   }
 }
 
 void requestEvent(){
-  Wire.write(onRequestData, BUFFERONREQUESTSIZE);
+  Wire.write(onRequestData, lenghtOnRequest);
 }

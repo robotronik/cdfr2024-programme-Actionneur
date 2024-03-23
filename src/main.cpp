@@ -95,9 +95,13 @@ void loop() {
 void receiveEvent(int numBytes) {
   uint8_t onReceiveData[BUFFERONRECEIVESIZE];
   int i = 0;
+  Serial.println("startInterupt");
   while (Wire.available() > 0) { // Tant qu'il y a des données disponibles
     if(i<BUFFERONRECEIVESIZE){
-      onReceiveData[i] = Wire.read(); // Lecture du caractère reçu
+      uint8_t test;
+      test = Wire.read();
+      Serial.println(test);
+      onReceiveData[i] = test;  // Lecture du caractère reçu
       i++;
     }
     else{
@@ -106,14 +110,22 @@ void receiveEvent(int numBytes) {
    
   }
 
+    Serial.println(onReceiveData[0]);
+    Serial.println(onReceiveData[1]);
+    Serial.println(onReceiveData[2]);
+    Serial.println();
+
   int commande;
   arrayToParameter(onReceiveData,BUFFERONREQUESTSIZE,"1%d",&commande);
 
   switch (commande)
   {
   case 1 :
-    int position;
-    arrayToParameter(onRequestData+1,BUFFERONREQUESTSIZE,"2%d",&position);
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONREQUESTSIZE,"2%d",&position);
+    if(position<20){
+      position = 20;
+    }
     servo1.write(position);
     break;
 

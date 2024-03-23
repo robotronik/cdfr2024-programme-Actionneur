@@ -34,7 +34,7 @@ void setup() {
   servo6.attach(PIN_SERVOMOTEUR_6);
   servo7.attach(PIN_SERVOMOTEUR_7);
   servo8.attach(PIN_SERVOMOTEUR_8);
-  servo1.write(0);
+  servo1.write(150);
   servo2.write(0);
   servo3.write(0);
   servo4.write(0);
@@ -78,6 +78,7 @@ void setup() {
   pinMode(PIN_CAPTEUR_8, INPUT_PULLUP);
 
   Serial.begin(115200);
+  Serial.println("start");
   Wire.begin(100);
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);

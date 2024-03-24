@@ -9,25 +9,26 @@
 
 
 #ifdef ARDUINO
-    #define GET_TIME_MS micros
+    #define GET_TIME_MS millis
 #else
     #define GET_TIME_MS get_uptime_ms
 #endif
 
 
 class positionControl{
-public:
+
+public :
+    double vitesseMaxAv = -1;
+    double accelerationMaxAv = -1; 
+    double decelerationMaxAv = -1;
+    double vitesseMaxAr = -1;
+    double accelerationMaxAr = -1; 
+    double decelerationMaxAr = -1;
+private :
     /* data */
     double position;
     double consigne;
     double vitesse;
-
-    double vitesseMaxAv = 45;
-    double accelerationMaxAv = 25; 
-    double decelerationMaxAv = 25;
-    double vitesseMaxAr = 45;
-    double accelerationMaxAr = 25; 
-    double decelerationMaxAr = 25;
     double deltaTemps = 0;
 
     uint32_t PreviousTime;

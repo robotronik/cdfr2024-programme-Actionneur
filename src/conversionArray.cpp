@@ -100,7 +100,7 @@ int arrayToParameter(type8b* array, int size, const char* format, ...) {
 template<typename T>
 void setData(T args, type8b* array,int countBiteArrayRead){
     for (int i = 0; i < countBiteArrayRead; i++){
-        array[i] = args >> (8*(countBiteArrayRead-1-i));
+        array[countBiteArrayRead-1-i] = args >> (8*(countBiteArrayRead-1-i));
     }
 }
 

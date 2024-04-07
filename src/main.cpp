@@ -194,6 +194,27 @@ void receiveEvent(int numBytes) {
     break;
   }
 
+  case 11:{
+    int position = 0; 
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    stepper1.moveTo(position);
+    break;
+  }
+
+  case 12:{
+    int position = 0; 
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    stepper2.moveTo(position);
+    break;
+  }
+
+  case 13:{
+    int position = 0; 
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    stepper3.moveTo(position);
+    break;
+  }
+
   default:
     break;
   }

@@ -59,6 +59,11 @@ void setup() {
   // setup vitesse max and acceleration max
   //servo1.setParamater(120,60,60,120,60,60);
   //servo1.setParamater(-1,-1,-1,-1,-1,-1);
+  pinMode(PIN_STEPPER_SLEEP, OUTPUT);
+  pinMode(PIN_STEPPER_RESET, OUTPUT);
+  digitalWrite(PIN_STEPPER_SLEEP, HIGH);
+  digitalWrite(PIN_STEPPER_RESET, HIGH);
+  delay(1);
 
   stepper1.setMaxSpeed(DEFAULT_MAX_SPEED);
   stepper1.setAcceleration(DEFAULT_MAX_ACCEL);
@@ -69,7 +74,7 @@ void setup() {
   pinMode(PIN_STEPPER_ENABLE_1, OUTPUT);
   pinMode(PIN_STEPPER_ENABLE_2, OUTPUT);
   pinMode(PIN_STEPPER_ENABLE_3, OUTPUT);
-  digitalWrite(PIN_STEPPER_ENABLE_1,HIGH);
+  digitalWrite(PIN_STEPPER_ENABLE_1,LOW);
   digitalWrite(PIN_STEPPER_ENABLE_2,HIGH);
   digitalWrite(PIN_STEPPER_ENABLE_3,HIGH);
 

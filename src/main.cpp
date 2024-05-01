@@ -41,7 +41,7 @@ void setup() {
   servo7.attach(PIN_SERVOMOTEUR_7);
   servo8.attach(PIN_SERVOMOTEUR_8);
   servo1.setMinMaxValue(80,160);
-  servo2.setMinMaxValue(10,35);
+  servo2.setMinMaxValue(5,35);
   servo3.setMinMaxValue(0,180);
   servo4.setMinMaxValue(0,180);
   servo5.setMinMaxValue(0,180);
@@ -49,7 +49,7 @@ void setup() {
   servo7.setMinMaxValue(0,180);
   servo8.setMinMaxValue(0,180);
   servo1.write(160);
-  servo2.write(10);
+  servo2.write(15);
   servo3.write(0);
   servo4.write(0);
   servo5.write(0);
@@ -74,16 +74,16 @@ void setup() {
   pinMode(PIN_STEPPER_ENABLE_1, OUTPUT);
   pinMode(PIN_STEPPER_ENABLE_2, OUTPUT);
   pinMode(PIN_STEPPER_ENABLE_3, OUTPUT);
-  digitalWrite(PIN_STEPPER_ENABLE_1,LOW);
+  digitalWrite(PIN_STEPPER_ENABLE_1,HIGH);
   digitalWrite(PIN_STEPPER_ENABLE_2,HIGH);
   digitalWrite(PIN_STEPPER_ENABLE_3,HIGH);
 
   pinMode(PIN_ACTIONNEUR_1, OUTPUT);
   pinMode(PIN_ACTIONNEUR_2, OUTPUT);
   pinMode(PIN_ACTIONNEUR_3, OUTPUT);
-  digitalWrite(PIN_ACTIONNEUR_1,LOW);
-  digitalWrite(PIN_ACTIONNEUR_2,LOW);
-  digitalWrite(PIN_ACTIONNEUR_3,LOW);
+  digitalWrite(PIN_ACTIONNEUR_1,HIGH);
+  digitalWrite(PIN_ACTIONNEUR_2,HIGH);
+  digitalWrite(PIN_ACTIONNEUR_3,HIGH);
 
   pinMode(PIN_MOTEURDC_REVERSE_1, OUTPUT);
   pinMode(PIN_MOTEURDC_FORWARD_1, OUTPUT);
@@ -97,11 +97,13 @@ void setup() {
   pinMode(PIN_CAPTEUR_1, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_2, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_3, INPUT_PULLUP);
-  pinMode(PIN_CAPTEUR_4, INPUT_PULLUP);
-  pinMode(PIN_CAPTEUR_5, INPUT_PULLUP);
+  pinMode(PIN_CAPTEUR_4, OUTPUT);
+  pinMode(PIN_CAPTEUR_5, OUTPUT);
   pinMode(PIN_CAPTEUR_6, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_7, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_8, INPUT_PULLUP);
+  digitalWrite(PIN_CAPTEUR_4,LOW);
+  digitalWrite(PIN_CAPTEUR_5,LOW);
 
   Wire.begin(100);
   Wire.setTimeout(1000);
@@ -219,6 +221,45 @@ void receiveEvent(int numBytes) {
     stepper3.moveTo(position);
     break;
   }
+  case 21:
+    digitalWrite(PIN_STEPPER_ENABLE_1,LOW);
+    break;
+  
+  case 22:
+    digitalWrite(PIN_STEPPER_ENABLE_1,HIGH);
+    break;
+  
+  case 23:
+    digitalWrite(PIN_STEPPER_ENABLE_2,LOW);
+    break;
+  
+  case 24:
+    digitalWrite(PIN_STEPPER_ENABLE_2,HIGH);
+    break;
+  
+  case 25:
+    digitalWrite(PIN_STEPPER_ENABLE_3,LOW);
+    break;
+  
+  case 26:
+    digitalWrite(PIN_STEPPER_ENABLE_3,HIGH);
+    break;
+
+  case 31:
+    digitalWrite(PIN_CAPTEUR_4,HIGH);
+    break;
+
+  case 32:
+    digitalWrite(PIN_CAPTEUR_4,LOW);
+    break;
+
+  case 33:
+    digitalWrite(PIN_CAPTEUR_5,HIGH);
+    break;
+
+  case 34:
+    digitalWrite(PIN_CAPTEUR_5,LOW);
+    break;
 
   default:
     break;
@@ -244,12 +285,12 @@ void requestEvent(){
     break;
 
   case 103 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_4));
+    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_4));
     lenghtOnRequest = 2;
     break;
 
   case 104 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_5));
+    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_5));
     lenghtOnRequest = 2;
     break;
 

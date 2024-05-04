@@ -13,7 +13,7 @@ AccelStepper stepper3(AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_
 
 
 servoControl servo1;
-servoControl servo2;
+servoControl servo2(true);
 servoControl servo3;
 servoControl servo4;
 servoControl servo5;

@@ -55,7 +55,7 @@ void servoControl::run(void){
     unsigned long progress = millis() - move_start_time;
     if (progress <= move_time) {
         long angle = map(progress, 0, move_start_time, start_angle, stop_angle);
-        myServo.write(angle); 
+        servo.write(angle); 
     } else {
         is_moving = false;
         start_angle = stop_angle; // update angle and stop moving

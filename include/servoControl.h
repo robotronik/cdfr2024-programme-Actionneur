@@ -11,8 +11,16 @@ private:
     positionControl posControl;
     int minVal = 0;
     int maxVal = 180;
+
+    // Variables to handle slow movement
+    bool move_slow;
+    unsigned long move_time = 2000; // time of servo movement in milli seconds
+    unsigned long move_start_time;
+    bool is_moving = false;
+    int start_angle = 0;
+    int stop_angle;
 public:
-    servoControl(/* args */);
+    servoControl(bool move_slow = false);
     void setMinValue(int min);
     void setMaxValue(int max);
     void setMinMaxValue(int min, int max);

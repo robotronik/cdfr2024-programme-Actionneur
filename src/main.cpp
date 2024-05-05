@@ -19,11 +19,7 @@ servoControl servo4;
 servoControl servo5;
 servoControl servo6;
 servoControl servo7;
-servoControl servo8;
-
-// Abdallah
-// int current_time;
-// bool done = false;
+// servoControl servo8;
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 uint8_t onRequestData[BUFFERONREQUESTSIZE];
@@ -31,7 +27,6 @@ int lenghtOnRequest;
 
 void receiveEvent(int numBytes);
 void requestEvent();
-void loop_test();
 
 void setup() {
   Serial.begin(115200);
@@ -44,7 +39,7 @@ void setup() {
   servo5.attach(PIN_SERVOMOTEUR_5);
   servo6.attach(PIN_SERVOMOTEUR_6);
   servo7.attach(PIN_SERVOMOTEUR_7);
-  servo8.attach(PIN_SERVOMOTEUR_8);
+  // servo8.attach(PIN_SERVOMOTEUR_8);
   servo1.setMinMaxValue(80,160);
   servo2.setMinMaxValue(0,40);
   servo3.setMinMaxValue(0,180);
@@ -52,7 +47,7 @@ void setup() {
   servo5.setMinMaxValue(0,180);
   servo6.setMinMaxValue(0,180);
   servo7.setMinMaxValue(0,180);
-  servo8.setMinMaxValue(0,180);
+  // servo8.setMinMaxValue(0,180);
   servo1.write(160);
   servo2.write(15);
   // servo2.write(0);
@@ -61,7 +56,7 @@ void setup() {
   servo5.write(0);
   servo6.write(0);
   servo7.write(0);
-  servo8.write(0);
+  // servo8.write(0);
   // setup vitesse max and acceleration max
   //servo1.setParamater(120,60,60,120,60,60);
   //servo1.setParamater(-1,-1,-1,-1,-1,-1);
@@ -111,13 +106,13 @@ void setup() {
   digitalWrite(PIN_CAPTEUR_4,LOW);
   digitalWrite(PIN_CAPTEUR_5,LOW);
 
+  // SETUP capteur plante
+  pinMode(PIN_CAPTEUR_PLANTE, INPUT);
+
   Wire.begin(100);
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
-
-  // Main test - Abdallah
-  // current_time = millis();
 }
 
 void loop() {
@@ -131,25 +126,9 @@ void loop() {
   servo5.run();
   servo6.run();
   servo7.run();
-  servo8.run();
-  // loop_test();
+  // servo8.run();
   //delay(100);
 }
-
-// Test function - Abdallah
-// void loop_test(){
-//   if (done){
-//     return;
-//   }
-//   int progress = millis() - current_time;
-//   if (progress <= 2000){
-//     return;
-//   }
-//   Serial.println("Set value");
-//   servo2.write(35);
-//   done = true;
-// }
-
 
 void receiveEvent(int numBytes) {
   int i = 0;
@@ -218,12 +197,12 @@ void receiveEvent(int numBytes) {
     break;
   }
 
-  case 8 :{
-    int position = 0; 
-    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
-    servo8.write(position);
-    break;
-  }
+  // case 8 :{
+  //   int position = 0; 
+  //   arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+  //   servo8.write(position);
+  //   break;
+  // }
 
   case 11:{
     int position = 0; 
@@ -330,6 +309,11 @@ void requestEvent(){
 
   case 107 :
     parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_8));
+    lenghtOnRequest = 2;
+    break;
+
+  case 109:
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_PLANTE));
     lenghtOnRequest = 2;
     break;
   

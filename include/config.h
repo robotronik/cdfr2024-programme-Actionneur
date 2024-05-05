@@ -13,7 +13,7 @@
 #define PIN_SERVOMOTEUR_5 11
 #define PIN_SERVOMOTEUR_6 10
 #define PIN_SERVOMOTEUR_7 13
-#define PIN_SERVOMOTEUR_8 12
+// #define PIN_SERVOMOTEUR_8 12
 
 //Pin Moteur pas a pas VALEUR HAUTE 2200 avec Microstep 1/8
 #define PIN_STEPPER_SLEEP 22
@@ -53,7 +53,7 @@
 #define PIN_CAPTEUR_6 37
 #define PIN_CAPTEUR_7 38
 #define PIN_CAPTEUR_8 39
-
+#define PIN_CAPTEUR_PLANTE 12
 
 //configuration Stepper
 #define DEFAULT_MAX_SPEED 5000  // Vitesse maximale (en pas par seconde)

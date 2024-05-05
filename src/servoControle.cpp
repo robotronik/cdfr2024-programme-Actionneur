@@ -45,7 +45,7 @@ void servoControl::write(int val){
         move_start_time = millis(); // To capture moving time
         is_moving = true;
         stop_angle = val;
-        Serial.println("Managed to start moving");
+        // Serial.println("Managed to start moving");
     }
 }
 
@@ -62,6 +62,7 @@ void servoControl::run(void){
         Serial.println("Stopped moving");
         is_moving = false;
         start_angle = stop_angle; // update angle and stop moving
+        servo.write(stop_angle);
         // Serial.println(stop_angle, DEC);
     }
 }

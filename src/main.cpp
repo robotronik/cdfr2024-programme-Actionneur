@@ -46,7 +46,7 @@ void setup() {
   servo7.attach(PIN_SERVOMOTEUR_7);
   servo8.attach(PIN_SERVOMOTEUR_8);
   servo1.setMinMaxValue(80,160);
-  servo2.setMinMaxValue(5,35);
+  servo2.setMinMaxValue(0,40);
   servo3.setMinMaxValue(0,180);
   servo4.setMinMaxValue(0,180);
   servo5.setMinMaxValue(0,180);

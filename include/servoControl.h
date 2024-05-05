@@ -14,7 +14,7 @@ private:
 
     // Variables to handle slow movement
     bool move_slow = false;
-    unsigned long move_time = 100; // time of servo movement in milli seconds
+    unsigned long move_time = 300; // time of servo movement in milli seconds
     unsigned long move_start_time;
     bool is_moving = false;
     int start_angle = 0;

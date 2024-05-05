@@ -21,12 +21,17 @@ servoControl servo6;
 servoControl servo7;
 servoControl servo8;
 
+// Abdallah
+// int current_time;
+// bool done = false;
+
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 uint8_t onRequestData[BUFFERONREQUESTSIZE];
 int lenghtOnRequest;
 
 void receiveEvent(int numBytes);
 void requestEvent();
+void loop_test();
 
 void setup() {
   Serial.begin(115200);
@@ -50,6 +55,7 @@ void setup() {
   servo8.setMinMaxValue(0,180);
   servo1.write(160);
   servo2.write(15);
+  // servo2.write(0);
   servo3.write(0);
   servo4.write(0);
   servo5.write(0);
@@ -109,6 +115,9 @@ void setup() {
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
+
+  // Main test - Abdallah
+  // current_time = millis();
 }
 
 void loop() {
@@ -123,8 +132,23 @@ void loop() {
   servo6.run();
   servo7.run();
   servo8.run();
+  // loop_test();
   //delay(100);
 }
+
+// Test function - Abdallah
+// void loop_test(){
+//   if (done){
+//     return;
+//   }
+//   int progress = millis() - current_time;
+//   if (progress <= 2000){
+//     return;
+//   }
+//   Serial.println("Set value");
+//   servo2.write(35);
+//   done = true;
+// }
 
 
 void receiveEvent(int numBytes) {

@@ -39,7 +39,7 @@ void servoControl::write(int val){
     else if(val>maxVal){
         val = maxVal;
     }
-    if (!move_slow || stop_angle < start_angle){ // Close fast but open slow
+    if (!move_slow || val < start_angle){ // Close fast but open slow
         servo.write(val);
     } else {
         move_start_time = millis(); // To capture moving time

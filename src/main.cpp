@@ -27,6 +27,9 @@ int lenghtOnRequest;
 
 void receiveEvent(int numBytes);
 void requestEvent();
+// void loop_test();
+// int current_time;
+// bool done = false;
 
 void setup() {
   Serial.begin(115200);
@@ -113,6 +116,7 @@ void setup() {
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
+  // current_time = millis();
 }
 
 void loop() {
@@ -126,9 +130,20 @@ void loop() {
   servo5.run();
   servo6.run();
   servo7.run();
+  // loop_test();
   // servo8.run();
   //delay(100);
 }
+
+// Abdallah test
+// void loop_test(){
+//   int time_passed = millis() - current_time;
+//   if (done || time_passed <= 5000){
+//     return;
+//   }
+//   servo2.write(0);
+//   done = true;
+// }
 
 void receiveEvent(int numBytes) {
   int i = 0;

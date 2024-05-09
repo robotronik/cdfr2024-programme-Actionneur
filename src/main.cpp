@@ -55,7 +55,7 @@ void setup() {
   servo2.write(15);
   // servo2.write(0);
   servo3.write(0);
-  servo4.write(0);
+  servo4.write(180);
   servo5.write(0);
   servo6.write(0);
   servo7.write(0);

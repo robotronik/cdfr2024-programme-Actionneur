@@ -3,7 +3,7 @@
 #include <Servo.h>
 #include <Wire.h>
 #include "config.h"
-#include "conversionArray.h"
+#include "utils.h"
 #include "servoControl.h"
 
 // TODO: move these defines later
@@ -11,12 +11,12 @@
 #define STEPPER_COUNT 3
 
 #define CMD_MOVE_SERVO 0x01
-#define CMD_MOVE_STEPPER 0x07
 #define CMD_READ_SENSOR 0x02
 #define CMD_ENABLE_STEPPER 0x03
 #define CMD_DISABLE_STEPPER 0x04
 #define CMD_LED_ON 0x05
 #define CMD_LED_OFF 0x06
+#define CMD_MOVE_STEPPER 0x07
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
 
@@ -28,9 +28,9 @@ AccelStepper stepper3(AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_
 
 // idk if this is ok
 AccelStepper steppers[STEPPER_COUNT] = { 
-  {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1},
-  {AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2},
-  {AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3},
+  {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1, PIN_STEPPER_ENABLE_1},
+  {AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2, PIN_STEPPER_ENABLE_2},
+  {AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3, PIN_STEPPER_ENABLE_3},
 };
 
 servoControl servos[SERVO_COUNT];
@@ -58,32 +58,32 @@ void setup() {
   initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 180, 0);
   initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 180, 0);
 
-  initPin(PIN_STEPPER_SLEEP, false);
-  initPin(PIN_STEPPER_RESET, false);
+  initOutPin(PIN_STEPPER_SLEEP, false);
+  initOutPin(PIN_STEPPER_RESET, false);
   delay(1); 
-  initStepper(steppers[0], PIN_STEPPER_ENABLE_1, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
-  initStepper(steppers[1], PIN_STEPPER_ENABLE_2, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
-  initStepper(steppers[2], PIN_STEPPER_ENABLE_3, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  initStepper(steppers[0], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  initStepper(steppers[1], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  initStepper(steppers[2], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
 
-  initPin(PIN_ACTIONNEUR_1, false);
-  initPin(PIN_ACTIONNEUR_2, false);
-  initPin(PIN_ACTIONNEUR_3, false);
+  initOutPin(PIN_ACTIONNEUR_1, false);
+  initOutPin(PIN_ACTIONNEUR_2, false);
+  initOutPin(PIN_ACTIONNEUR_3, false);
 
-  initPin(PIN_MOTEURDC_REVERSE_1, true);
-  initPin(PIN_MOTEURDC_FORWARD_1, true);
-  initPin(PIN_MOTEURDC_REVERSE_2, true);
-  initPin(PIN_MOTEURDC_FORWARD_2, true);
+  initOutPin(PIN_MOTEURDC_REVERSE_1, true);
+  initOutPin(PIN_MOTEURDC_FORWARD_1, true);
+  initOutPin(PIN_MOTEURDC_REVERSE_2, true);
+  initOutPin(PIN_MOTEURDC_FORWARD_2, true);
 
   // sensor pins are from 32 to 39 in order, we could make a loop here if the pinmodes were the same 
   // what's up with sensors 4 & 5??
-  pinMode(PIN_CAPTEUR_1, INPUT_PULLUP);
-  pinMode(PIN_CAPTEUR_2, INPUT_PULLUP);
-  pinMode(PIN_CAPTEUR_3, INPUT_PULLUP);
-  initPin(PIN_CAPTEUR_4, true); 
-  initPin(PIN_CAPTEUR_5, true);
-  pinMode(PIN_CAPTEUR_6, INPUT_PULLUP);
-  pinMode(PIN_CAPTEUR_7, INPUT_PULLUP);
-  pinMode(PIN_CAPTEUR_8, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_1, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_2, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_3, INPUT_PULLUP);
+  initOutPin(PIN_SENSOR_4, true); 
+  initOutPin(PIN_SENSOR_5, true);
+  pinMode(PIN_SENSOR_6, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_7, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_8, INPUT_PULLUP);
 
   Wire.begin(100);
   Wire.setTimeout(1000);
@@ -113,25 +113,21 @@ void receiveEvent(int numBytes) {
     }
   }
 
-  int command;
-  int number; 
-  int value;
-  arrayToParameter(onReceiveData,BUFFERONRECEIVESIZE,"1%d",&command);
-  arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&number);
-  arrayToParameter(onReceiveData+2,BUFFERONRECEIVESIZE,"3%d",&value);
-
+  uint8_t* ptr = onReceiveData;
+  uint8_t command = ReadInt8(&ptr);
+  uint8_t number = ReadInt8(&ptr);
   switch(command) {
     case CMD_MOVE_SERVO:
-      servos[number - 1].write(value);
+      servos[number - 1].write(ReadInt8(&ptr));
       break;
     case CMD_MOVE_STEPPER:
-      steppers[number - 1].moveTo(value);
+      steppers[number - 1].moveTo(ReadInt32(&ptr));
       break;
-    case CMD_ENABLE_STEPPER: // number should contain pin number, e.g PIN_STEPPER_ENABLE_1 
-      digitalWrite(number, HIGH);
+    case CMD_ENABLE_STEPPER: 
+      steppers[number - 1].enableOutputs();
       break;
     case CMD_DISABLE_STEPPER:
-      digitalWrite(number, LOW);
+      steppers[number - 1].disableOutputs();
       break;
     case CMD_LED_ON:
       // todo (idk what pins to enable yet)
@@ -153,45 +149,47 @@ void receiveEvent(int numBytes) {
 
 // TODO: figure out what do with this
 void requestEvent(){ // this reads data from a sensor
-  switch (onReceiveData[0])
+  uint8_t* ptr = onReceiveData;
+  int8_t command = ReadInt8(&ptr);
+  switch (command)
   {
   case 100 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_1));
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_1));
     lenghtOnRequest = 2;
     break;
 
   case 101 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_2));
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_2));
     lenghtOnRequest = 2;
     break;
 
   case 102 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_3));
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_3));
     lenghtOnRequest = 2;
     break;
 
   case 103 :
-    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_4));
+    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_4));
     lenghtOnRequest = 2;
     break;
 
   case 104 :
-    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_5));
+    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_5));
     lenghtOnRequest = 2;
     break;
 
   case 105 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_6));
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_6));
     lenghtOnRequest = 2;
     break;
 
   case 106 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_7));
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_7));
     lenghtOnRequest = 2;
     break;
 
   case 107 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_8));
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_8));
     lenghtOnRequest = 2;
     break;
   
@@ -208,19 +206,15 @@ void initServo(servoControl servo, int pin, int min, int max, int writeVal) {
   return;
 }
 
-void initStepper(AccelStepper stepper, int pin, int maxSpeed, int accel) {
+void initStepper(AccelStepper stepper, int maxSpeed, int accel) {
   stepper.setMaxSpeed(maxSpeed);
   stepper.setAcceleration(accel);
-  pinMode(pin, OUTPUT);
-  digitalWrite(pin, HIGH);
+  stepper.disableOutputs();
   return;
 }
 
-void initPin(int pin, bool low) {
+void initOutPin(int pin, bool low) {
   pinMode(pin, OUTPUT);
-  if(low)
-    digitalWrite(pin, LOW);
-  else
-    digitalWrite(pin, HIGH);
+  digitalWrite(pin, low ? LOW : HIGH);
   return;
 }

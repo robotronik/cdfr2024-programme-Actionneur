@@ -45,15 +45,15 @@
 
 
 //pin capteur
-#define PIN_CAPTEUR_1 32
-#define PIN_CAPTEUR_2 33
-#define PIN_CAPTEUR_3 34
-#define PIN_CAPTEUR_4 35
-#define PIN_CAPTEUR_5 36
-#define PIN_CAPTEUR_6 37
-#define PIN_CAPTEUR_7 38
-#define PIN_CAPTEUR_8 39
-#define PIN_CAPTEUR_PLANTE 12
+#define PIN_SENSOR_1 32
+#define PIN_SENSOR_2 33
+#define PIN_SENSOR_3 34
+#define PIN_SENSOR_4 35
+#define PIN_SENSOR_5 36
+#define PIN_SENSOR_6 37
+#define PIN_SENSOR_7 38
+#define PIN_SENSOR_8 39
+#define PIN_SENSOR_PLANTE 12
 
 //configuration Stepper
 #define DEFAULT_MAX_SPEED 5000  // Vitesse maximale (en pas par seconde)

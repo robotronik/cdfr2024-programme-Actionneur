@@ -6,20 +6,21 @@
 #include "conversionArray.h"
 #include "servoControl.h"
 
+// TODO: move these defines later
+#define SERVO_MAX_VALUE 180
+#define SERVO_MIN_VALUE 0
 
 AccelStepper stepper1(AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1);
 AccelStepper stepper2(AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2);
 AccelStepper stepper3(AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3);
 
-
 servoControl servo1;
-servoControl servo2(true);
+servoControl servo2(true); // ??
 servoControl servo3;
 servoControl servo4;
 servoControl servo5;
 servoControl servo6;
 servoControl servo7;
-// servoControl servo8;
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 uint8_t onRequestData[BUFFERONREQUESTSIZE];
@@ -27,77 +28,37 @@ int lenghtOnRequest;
 
 void receiveEvent(int numBytes);
 void requestEvent();
-// void loop_test();
-// int current_time;
-// bool done = false;
 
 void setup() {
   Serial.begin(115200);
   Serial.println("start 2");
 
-  servo1.attach(PIN_SERVOMOTEUR_1);
-  servo2.attach(PIN_SERVOMOTEUR_2);
-  servo3.attach(PIN_SERVOMOTEUR_3);
-  servo4.attach(PIN_SERVOMOTEUR_4);
-  servo5.attach(PIN_SERVOMOTEUR_5);
-  servo6.attach(PIN_SERVOMOTEUR_6);
-  servo7.attach(PIN_SERVOMOTEUR_7);
-  // servo8.attach(PIN_SERVOMOTEUR_8);
-  servo1.setMinMaxValue(80,160);
-  servo2.setMinMaxValue(0,40);
-  servo3.setMinMaxValue(0,180);
-  servo4.setMinMaxValue(0,180);
-  servo5.setMinMaxValue(0,180);
-  servo6.setMinMaxValue(0,180);
-  servo7.setMinMaxValue(0,180);
-  // servo8.setMinMaxValue(0,180);
-  servo1.write(160);
-  servo2.write(15);
-  // servo2.write(0);
-  servo3.write(0);
-  servo4.write(180);
-  servo5.write(0);
-  servo6.write(0);
-  servo7.write(0);
-  // servo8.write(0);
-  // setup vitesse max and acceleration max
-  //servo1.setParamater(120,60,60,120,60,60);
-  //servo1.setParamater(-1,-1,-1,-1,-1,-1);
-  pinMode(PIN_STEPPER_SLEEP, OUTPUT);
-  pinMode(PIN_STEPPER_RESET, OUTPUT);
-  digitalWrite(PIN_STEPPER_SLEEP, HIGH);
-  digitalWrite(PIN_STEPPER_RESET, HIGH);
-  delay(1);
+  initServo(servo1, PIN_SERVOMOTEUR_1, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
+  initServo(servo2, PIN_SERVOMOTEUR_2, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
+  initServo(servo3, PIN_SERVOMOTEUR_3, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
+  initServo(servo4, PIN_SERVOMOTEUR_4, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
+  initServo(servo4, PIN_SERVOMOTEUR_5, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
+  initServo(servo4, PIN_SERVOMOTEUR_6, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
+  initServo(servo4, PIN_SERVOMOTEUR_7, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
 
-  stepper1.setMaxSpeed(DEFAULT_MAX_SPEED);
-  stepper1.setAcceleration(DEFAULT_MAX_ACCEL);
-  stepper2.setMaxSpeed(DEFAULT_MAX_SPEED);
-  stepper2.setAcceleration(DEFAULT_MAX_ACCEL);
-  stepper3.setMaxSpeed(DEFAULT_MAX_SPEED);
-  stepper3.setAcceleration(DEFAULT_MAX_ACCEL);
-  pinMode(PIN_STEPPER_ENABLE_1, OUTPUT);
-  pinMode(PIN_STEPPER_ENABLE_2, OUTPUT);
-  pinMode(PIN_STEPPER_ENABLE_3, OUTPUT);
-  digitalWrite(PIN_STEPPER_ENABLE_1,HIGH);
-  digitalWrite(PIN_STEPPER_ENABLE_2,HIGH);
-  digitalWrite(PIN_STEPPER_ENABLE_3,HIGH);
+  initPin(PIN_STEPPER_SLEEP, false);
+  initPin(PIN_STEPPER_RESET, false);
+  delay(1); // ??
+  initStepper(stepper1, PIN_STEPPER_ENABLE_1, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  initStepper(stepper2, PIN_STEPPER_ENABLE_1, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  initStepper(stepper3, PIN_STEPPER_ENABLE_1, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
 
-  pinMode(PIN_ACTIONNEUR_1, OUTPUT);
-  pinMode(PIN_ACTIONNEUR_2, OUTPUT);
-  pinMode(PIN_ACTIONNEUR_3, OUTPUT);
-  digitalWrite(PIN_ACTIONNEUR_1,HIGH);
-  digitalWrite(PIN_ACTIONNEUR_2,HIGH);
-  digitalWrite(PIN_ACTIONNEUR_3,HIGH);
+  initPin(PIN_ACTIONNEUR_1, false);
+  initPin(PIN_ACTIONNEUR_2, false);
+  initPin(PIN_ACTIONNEUR_3, false);
 
-  pinMode(PIN_MOTEURDC_REVERSE_1, OUTPUT);
-  pinMode(PIN_MOTEURDC_FORWARD_1, OUTPUT);
-  digitalWrite(PIN_MOTEURDC_REVERSE_1,LOW);
-  digitalWrite(PIN_MOTEURDC_FORWARD_1,LOW);
-  pinMode(PIN_MOTEURDC_REVERSE_2, OUTPUT);
-  pinMode(PIN_MOTEURDC_FORWARD_2, OUTPUT);
-  digitalWrite(PIN_MOTEURDC_REVERSE_2,HIGH);
-  digitalWrite(PIN_MOTEURDC_FORWARD_2,HIGH);
+  initPin(PIN_MOTEURDC_REVERSE_1, true);
+  initPin(PIN_MOTEURDC_FORWARD_1, true);
+  initPin(PIN_MOTEURDC_REVERSE_2, true);
+  initPin(PIN_MOTEURDC_FORWARD_2, true);
 
+  // sensor pins are from 32 to 39 in order, we could make a loop here if the pinmodes were the same 
+  // what's up with sensors 4 & 5??
   pinMode(PIN_CAPTEUR_1, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_2, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_3, INPUT_PULLUP);
@@ -106,11 +67,8 @@ void setup() {
   pinMode(PIN_CAPTEUR_6, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_7, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_8, INPUT_PULLUP);
-  digitalWrite(PIN_CAPTEUR_4,LOW);
-  digitalWrite(PIN_CAPTEUR_5,LOW);
-
-  // SETUP capteur plante
-  pinMode(PIN_CAPTEUR_PLANTE, INPUT);
+  digitalWrite(PIN_CAPTEUR_4, LOW);
+  digitalWrite(PIN_CAPTEUR_5, LOW);
 
   Wire.begin(100);
   Wire.setTimeout(1000);
@@ -134,16 +92,6 @@ void loop() {
   // servo8.run();
   //delay(100);
 }
-
-// Abdallah test
-// void loop_test(){
-//   int time_passed = millis() - current_time;
-//   if (done || time_passed <= 5000){
-//     return;
-//   }
-//   servo2.write(0);
-//   done = true;
-// }
 
 void receiveEvent(int numBytes) {
   int i = 0;
@@ -336,4 +284,28 @@ void requestEvent(){
     break;
   }
   Wire.write(onRequestData, lenghtOnRequest);
+}
+
+void initServo(servoControl servo, int pin, int min, int max, int writeVal) {
+  servo.attach(pin);
+  servo.setMinMax(min, max);
+  servo.write(writeVal); // not sure wat it do (initialize servo position?)
+  return;
+}
+
+void initStepper(AccelStepper stepper, int pin, int maxSpeed, int accel) {
+  stepper.setMaxSpeed(maxSpeed);
+  stepper.setAcceleration(accel);
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, HIGH);
+  return;
+}
+
+void initPin(int pin, bool low) {
+  pinMode(pin, OUTPUT);
+  if(low)
+    digitalWrite(pin, LOW);
+  else
+    digitalWrite(pin, HIGH);
+  return;
 }

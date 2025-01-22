@@ -7,10 +7,18 @@
 #include "servoControl.h"
 
 // TODO: move these defines later
-#define SERVO_MAX_VALUE 180
-#define SERVO_MIN_VALUE 0
 #define SERVO_COUNT 7
 #define STEPPER_COUNT 3
+
+#define CMD_MOVE_SERVO 0x01
+#define CMD_MOVE_STEPPER 0x07
+#define CMD_READ_SENSOR 0x02
+#define CMD_ENABLE_STEPPER 0x03
+#define CMD_DISABLE_STEPPER 0x04
+#define CMD_LED_ON 0x05
+#define CMD_LED_OFF 0x06
+#define CMD_SET_STEPPER 0x08
+#define CMD_GET_STEPPER 0x09
 
 /* TODO: Remove
 AccelStepper stepper1(AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1);
@@ -25,21 +33,10 @@ AccelStepper steppers[STEPPER_COUNT] = {
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3};
 }
 
-/* TODO: Remove
-servoControl servo1;
-servoControl servo2(true); // ??
-servoControl servo3;
-servoControl servo4;
-servoControl servo5;
-servoControl servo6;
-servoControl servo7;
-*/
-
 servoControl *servos[SERVO_COUNT];
 for(int i=0; i<SERVO_COUNT; i++) {
   servos[i] = new servoControl; 
 }
-
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 uint8_t onRequestData[BUFFERONREQUESTSIZE];
@@ -52,20 +49,20 @@ void setup() {
   Serial.begin(115200);
   Serial.println("start 2");
 
-  initServo(servos[0], PIN_SERVOMOTEUR_1, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
-  initServo(servos[1], PIN_SERVOMOTEUR_2, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
-  initServo(servos[2], PIN_SERVOMOTEUR_3, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
-  initServo(servos[3], PIN_SERVOMOTEUR_4, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
-  initServo(servos[4], PIN_SERVOMOTEUR_5, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
-  initServo(servos[5], PIN_SERVOMOTEUR_6, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
-  initServo(servos[6], PIN_SERVOMOTEUR_7, SERVO_MIN_VALUE, SERVO_MAX_VALUE, 0);
+  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 0);
+  initServo(servos[1], PIN_SERVOMOTEUR_2, 0, 180, 0);
+  initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 180, 0);
+  initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 0);
+  initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 180, 0);
+  initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 180, 0);
+  initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 180, 0);
 
   initPin(PIN_STEPPER_SLEEP, false);
   initPin(PIN_STEPPER_RESET, false);
-  delay(1); // ??
+  delay(1); 
   initStepper(steppers[0], PIN_STEPPER_ENABLE_1, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
-  initStepper(steppers[1], PIN_STEPPER_ENABLE_1, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
-  initStepper(steppers[2], PIN_STEPPER_ENABLE_1, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  initStepper(steppers[1], PIN_STEPPER_ENABLE_2, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  initStepper(steppers[2], PIN_STEPPER_ENABLE_3, DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
 
   initPin(PIN_ACTIONNEUR_1, false);
   initPin(PIN_ACTIONNEUR_2, false);
@@ -81,18 +78,16 @@ void setup() {
   pinMode(PIN_CAPTEUR_1, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_2, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_3, INPUT_PULLUP);
-  pinMode(PIN_CAPTEUR_4, OUTPUT);
-  pinMode(PIN_CAPTEUR_5, OUTPUT);
+  initPin(PIN_CAPTEUR_4, true); 
+  initPin(PIN_CAPTEUR_5, true);
   pinMode(PIN_CAPTEUR_6, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_7, INPUT_PULLUP);
   pinMode(PIN_CAPTEUR_8, INPUT_PULLUP);
-  digitalWrite(PIN_CAPTEUR_4, LOW);
-  digitalWrite(PIN_CAPTEUR_5, LOW);
 
   Wire.begin(100);
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
-  Wire.onRequest(requestEvent);
+  Wire.onRequest(requestEvent); // this should probably be moved to receiveEvent
   // current_time = millis();
 }
 
@@ -108,75 +103,55 @@ void loop() {
 void receiveEvent(int numBytes) {
   int i = 0;
   while (Wire.available() > 0) {
-    if(i<BUFFERONRECEIVESIZE){
+    if(i<BUFFERONRECEIVESIZE) {
       onReceiveData[i] = Wire.read();
       i++;
     }
-    else{
+    else {
       Wire.read();
     }
-   
   }
 
-  // still kinda ugly
-  int number;  
-  int position = 0; 
-  arrayToParameter(onReceiveData,BUFFERONRECEIVESIZE,"1%d",&number);
-  arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+  int command;
+  int number; 
+  int value;
+  arrayToParameter(onReceiveData,BUFFERONRECEIVESIZE,"1%d",&command);
+  arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&number);
+  arrayToParameter(onReceiveData+2,BUFFERONRECEIVESIZE,"3%d",&value);
 
-  if(number > STEPPER_COUNT + 10) { // servos can take ids from 1 to 10, and steppers 10 to 20. above we do other stuff
-    switch(number) { // old code here still, dunno if it can be simplified
-      case 21:
-        digitalWrite(PIN_STEPPER_ENABLE_1,LOW);
-        break;
-  
-      case 22:
-        digitalWrite(PIN_STEPPER_ENABLE_1,HIGH);
-        break;
-  
-      case 23:
-        digitalWrite(PIN_STEPPER_ENABLE_2,LOW);
-        break;
-  
-      case 24:
-        digitalWrite(PIN_STEPPER_ENABLE_2,HIGH);
-        break;
-  
-      case 25:
-        digitalWrite(PIN_STEPPER_ENABLE_3,LOW);
-        break;
-  
-      case 26:
-        digitalWrite(PIN_STEPPER_ENABLE_3,HIGH);
-        break;
-
-      case 31:
-        digitalWrite(PIN_CAPTEUR_4,HIGH);
-        break;
-
-      case 32:
-        digitalWrite(PIN_CAPTEUR_4,LOW);
-        break;
-
-      case 33:
-        digitalWrite(PIN_CAPTEUR_5,HIGH);
-        break;
-
-      case 34:
-        digitalWrite(PIN_CAPTEUR_5,LOW);
-        break;
-
-      default: break;
-    }
+  switch(command) {
+    case CMD_MOVE_SERVO:
+      servos[number - 1].write(value);
+      break;
+    case CMD_MOVE_STEPPER:
+      steppers[number - 1].write(value);
+      break;
+    case CMD_ENABLE_STEPPER: // number should contain pin number, e.g PIN_STEPPER_ENABLE_1 
+      digitalWrite(number, HIGH);
+      break;
+    case CMD_DISABLE_STEPPER:
+      digitalWrite(number, LOW);
+      break;
+    case CMD_LED_ON:
+      // todo (idk what pins to enable yet)
+      break; 
+    case CMD_LED_OFF:
+      // todo
+      break;
+    case CMD_READ_SENSOR: // replaces requestEvent (see below)
+      // todo
+      break;
+    case CMD_SET_STEPPER:
+      // todo (use stepper.setCurrentPosition())
+      break;
+    case CMD_GET_STEPPER:
+      // todo (use stepper.CurrentPosition())
+      break;
   }
-  else if(number > SERVO_COUNT) 
-    steppers[number - 1].write(position);
-  else 
-    servos[number - 1].write(position);
-
 }
 
-void requestEvent(){ // i have no idea what this really does yet
+// TODO: figure out what do with this
+void requestEvent(){ // this reads data from a sensor
   switch (onReceiveData[0])
   {
   case 100 :

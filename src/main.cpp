@@ -28,15 +28,12 @@ AccelStepper stepper3(AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_
 
 // idk if this is ok
 AccelStepper steppers[STEPPER_COUNT] = { 
-  {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1};
-  {AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2};
-  {AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3};
-}
+  {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1},
+  {AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2},
+  {AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3},
+};
 
-servoControl *servos[SERVO_COUNT];
-for(int i=0; i<SERVO_COUNT; i++) {
-  servos[i] = new servoControl; 
-}
+servoControl servos[SERVO_COUNT];
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 uint8_t onRequestData[BUFFERONREQUESTSIZE];
@@ -48,6 +45,10 @@ void requestEvent();
 void setup() {
   Serial.begin(115200);
   Serial.println("start 2");
+
+  for(int i=0; i<SERVO_COUNT; i++) {
+    servos[i] = new servoControl; 
+  }
 
   initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 0);
   initServo(servos[1], PIN_SERVOMOTEUR_2, 0, 180, 0);
@@ -124,7 +125,7 @@ void receiveEvent(int numBytes) {
       servos[number - 1].write(value);
       break;
     case CMD_MOVE_STEPPER:
-      steppers[number - 1].write(value);
+      steppers[number - 1].moveTo(value);
       break;
     case CMD_ENABLE_STEPPER: // number should contain pin number, e.g PIN_STEPPER_ENABLE_1 
       digitalWrite(number, HIGH);
@@ -202,7 +203,7 @@ void requestEvent(){ // this reads data from a sensor
 
 void initServo(servoControl servo, int pin, int min, int max, int writeVal) {
   servo.attach(pin);
-  servo.setMinMax(min, max);
+  servo.setMinMaxValue(min, max);
   servo.write(writeVal); // not sure wat it do (initialize servo position?)
   return;
 }

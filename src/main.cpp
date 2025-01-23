@@ -20,13 +20,6 @@
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
 
-/* TODO: Remove
-AccelStepper stepper1(AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1);
-AccelStepper stepper2(AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2);
-AccelStepper stepper3(AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3);
-*/
-
-// idk if this is ok
 AccelStepper steppers[STEPPER_COUNT] = { 
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1, PIN_STEPPER_ENABLE_1},
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2, PIN_STEPPER_ENABLE_2},
@@ -37,10 +30,12 @@ servoControl servos[SERVO_COUNT];
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 uint8_t onRequestData[BUFFERONREQUESTSIZE];
-int lenghtOnRequest;
 
 void receiveEvent(int numBytes);
 void requestEvent();
+void initServo(servoControl servo, int pin, int min, int max, int initialPos);
+void initStepper(AccelStepper stepper, int maxSpeed, int Accel);
+void initOutPin(int pin, bool low);
 
 void setup() {
   Serial.begin(115200);
@@ -74,21 +69,20 @@ void setup() {
   initOutPin(PIN_MOTEURDC_REVERSE_2, true);
   initOutPin(PIN_MOTEURDC_FORWARD_2, true);
 
-  // sensor pins are from 32 to 39 in order, we could make a loop here if the pinmodes were the same 
-  // what's up with sensors 4 & 5??
   pinMode(PIN_SENSOR_1, INPUT_PULLUP);
   pinMode(PIN_SENSOR_2, INPUT_PULLUP);
   pinMode(PIN_SENSOR_3, INPUT_PULLUP);
-  initOutPin(PIN_SENSOR_4, true); 
-  initOutPin(PIN_SENSOR_5, true);
+  pinMode(PIN_SENSOR_4, INPUT_PULLUP);
+  pinMode(PIN_SENSOR_5, INPUT_PULLUP);
   pinMode(PIN_SENSOR_6, INPUT_PULLUP);
-  pinMode(PIN_SENSOR_7, INPUT_PULLUP);
-  pinMode(PIN_SENSOR_8, INPUT_PULLUP);
+
+  initOutPin(PIN_LED_1, true); 
+  initOutPin(PIN_LED_2, true);
 
   Wire.begin(100);
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
-  Wire.onRequest(requestEvent); // this should probably be moved to receiveEvent
+  Wire.onRequest(requestEvent);
   // current_time = millis();
 }
 
@@ -130,79 +124,92 @@ void receiveEvent(int numBytes) {
       steppers[number - 1].disableOutputs();
       break;
     case CMD_LED_ON:
-      // todo (idk what pins to enable yet)
-      break; 
+      switch(number) {
+        case 1:  
+          digitalWrite(PIN_LED_1, HIGH);
+          break;
+        case 2:
+          digitalWrite(PIN_LED_2, HIGH);
+          break;
+        default:
+          break;
+      } 
     case CMD_LED_OFF:
-      // todo
+      switch(number) {
+        case 1:
+          digitalWrite(PIN_LED_1, LOW);
+          break;
+        case 2:
+          digitalWrite(PIN_LED_2, LOW);
+          break;
+        default:
+          break;
+      }
       break;
-    case CMD_READ_SENSOR: // replaces requestEvent (see below)
-      // todo
+    case CMD_SET_STEPPER: // sets current position as the new zero
+      steppers[number - 1].setCurrentPosition(steppers[number - 1].currentPosition());
       break;
-    case CMD_SET_STEPPER:
-      // todo (use stepper.setCurrentPosition())
-      break;
-    case CMD_GET_STEPPER:
-      // todo (use stepper.CurrentPosition())
-      break;
+    default:
+      break;      
   }
+
+  return;
 }
 
-// TODO: figure out what do with this
-void requestEvent(){ // this reads data from a sensor
-  uint8_t* ptr = onReceiveData;
-  int8_t command = ReadInt8(&ptr);
+void requestEvent() { // used to read sensor data 
+  uint8_t* ptr_receive = onReceiveData;
+  uint8_t* ptr_request = onRequestData;
+  int8_t command = ReadInt8(&ptr_receive);
+  uint8_t number = ReadInt8(&ptr_receive);
+  size_t byte_amount;
+
   switch (command)
   {
-  case 100 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_1));
-    lenghtOnRequest = 2;
-    break;
-
-  case 101 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_2));
-    lenghtOnRequest = 2;
-    break;
-
-  case 102 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_3));
-    lenghtOnRequest = 2;
-    break;
-
-  case 103 :
-    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_4));
-    lenghtOnRequest = 2;
-    break;
-
-  case 104 :
-    //parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_5));
-    lenghtOnRequest = 2;
-    break;
-
-  case 105 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_6));
-    lenghtOnRequest = 2;
-    break;
-
-  case 106 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_7));
-    lenghtOnRequest = 2;
-    break;
-
-  case 107 :
-    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_SENSOR_8));
-    lenghtOnRequest = 2;
-    break;
-  
-  default:
-    break;
+    case CMD_GET_STEPPER:
+      WriteInt32(&ptr_request, steppers[number - 1].currentPosition());
+      byte_amount = 4;
+      break;
+    case CMD_READ_SENSOR:
+      byte_amount = 1;
+      switch(number) {
+        case 1:
+          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_1));
+          break;
+        case 2:
+          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_2));
+          break;
+        case 3:
+          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_3));
+          break;
+        case 4:
+          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_4));
+          break;
+        case 5:
+          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_5));
+          break;
+        case 6:
+          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_6));
+          break;
+        case 7:
+          WriteInt8(&ptr_request, digitalRead(PIN_LED_1));
+          break;
+        case 8:
+          WriteInt8(&ptr_request, digitalRead(PIN_LED_2));
+          break;
+        default:
+          break;
+      }
+      break;
+    default:
+      break;
   }
-  Wire.write(onRequestData, lenghtOnRequest);
+  Wire.write(onRequestData, byte_amount);
 }
 
-void initServo(servoControl servo, int pin, int min, int max, int writeVal) {
+void initServo(servoControl servo, int pin, int min, int max, int initialPos) {
   servo.attach(pin);
   servo.setMinMaxValue(min, max);
-  servo.write(writeVal); // not sure wat it do (initialize servo position?)
+  servo.write(initialPos);
   return;
 }
 

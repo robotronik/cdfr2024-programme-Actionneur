@@ -46,6 +46,7 @@ void requestEvent();
 void initServo(servoControl servo, int pin, int min, int max, int initialPos);
 void initStepper(AccelStepper stepper, int maxSpeed, int Accel);
 void initOutPin(int pin, bool low);
+void initInPin(int pin);
 
 void setup() {
 #ifdef SERIAL_DEBUG

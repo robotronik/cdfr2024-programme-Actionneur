@@ -39,6 +39,7 @@ servoControl servos[SERVO_COUNT];
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 int onReceiveDataSize = 0;
 uint8_t ResponseData[BUFFERONRECEIVESIZE];
+int ResponseDataSize = 0;
 
 void receiveEvent(int numBytes);
 void requestEvent();
@@ -121,6 +122,8 @@ void receiveEvent(int numBytes) {
   uint8_t* ptr = onReceiveData;
   uint8_t command = ReadInt8(&ptr);
   uint8_t number = ReadInt8(&ptr);
+
+  uint8_t* resp_ptr = ResponseData;// + ResponseDataSize; // For requests
   switch(command) {
     case CMD_MOVE_SERVO:
       if (number > SERVO_COUNT || number < 1) break;
@@ -148,25 +151,8 @@ void receiveEvent(int numBytes) {
     case CMD_SET_STEPPER: // Set the stepper position at the recieved posititon
       steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
       break;
-    default:
-      break;      
-  }
-  onReceiveDataSize -= ptr - onReceiveData;
 
-  return;
-}
-
-void requestEvent() {
-#ifdef SERIAL_DEBUG
-  Serial.print("Request !");
-#endif
-  uint8_t* ptr = onReceiveData;
-  int8_t command = ReadInt8(&ptr);
-  uint8_t number = ReadInt8(&ptr);
-  uint8_t* resp_ptr = ResponseData;
-
-  switch (command)
-  {
+    // Request commands
     case CMD_GET_STEPPER:
       WriteInt32(&resp_ptr, steppers[number - 1].currentPosition());
       break;
@@ -174,9 +160,26 @@ void requestEvent() {
       WriteInt8(&resp_ptr, digitalRead(sensor_pins[number - 1]));
       break;
     default:
-      break;
+      break;      
   }
-  Wire.write(ResponseData, resp_ptr - ResponseData);
+  onReceiveDataSize -= ptr - onReceiveData;
+  ResponseDataSize += resp_ptr - ResponseData;
+
+  return;
+}
+
+void requestEvent() {
+#ifdef SERIAL_DEBUG
+  Serial.println("Request ! Sending: ");
+  for (int i = 0; i < ResponseDataSize; i++) {
+    Serial.print(ResponseData[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+#endif
+
+  Wire.write(ResponseData, ResponseDataSize);
+  ResponseDataSize = 0;
 }
 
 void initServo(servoControl servo, int pin, int min, int max, int initialPos) {

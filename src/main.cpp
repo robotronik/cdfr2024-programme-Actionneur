@@ -85,7 +85,7 @@ void setup() {
   for (int i = 0; i < SENSOR_COUNT; i++) {
     initInPin(sensor_pins[i]);
   }
-  for (int i = 0; i < SENSOR_COUNT; i++) {
+  for (int i = 0; i < LED_COUNT; i++) {
     initOutPin(led_pins[i], true); 
   }
 

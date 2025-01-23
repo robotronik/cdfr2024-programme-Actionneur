@@ -163,7 +163,7 @@ void receiveEvent(int numBytes) {
     default:
       break;      
   }
-  onReceiveDataSize -= ptr - onReceiveData;
+  //onReceiveDataSize -= ptr - onReceiveData;
   ResponseDataSize += resp_ptr - ResponseData;
 
   return;

@@ -6,9 +6,14 @@
 #include "utils.h"
 #include "servoControl.h"
 
+// Comment this line to disable serial debug
+#define SERIAL_DEBUG
+
 // TODO: move these defines later
 #define SERVO_COUNT 7
 #define STEPPER_COUNT 3
+#define LED_COUNT 2
+#define SENSOR_COUNT 6
 
 #define CMD_MOVE_SERVO 0x01
 #define CMD_READ_SENSOR 0x02
@@ -20,6 +25,9 @@
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
 
+const int led_pins[LED_COUNT] = {PIN_LED_1, PIN_LED_2};
+const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6};
+
 AccelStepper steppers[STEPPER_COUNT] = { 
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1, PIN_STEPPER_ENABLE_1},
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2, PIN_STEPPER_ENABLE_2},
@@ -29,7 +37,8 @@ AccelStepper steppers[STEPPER_COUNT] = {
 servoControl servos[SERVO_COUNT];
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
-uint8_t onRequestData[BUFFERONREQUESTSIZE];
+int onReceiveDataSize = 0;
+uint8_t ResponseData[BUFFERONRECEIVESIZE];
 
 void receiveEvent(int numBytes);
 void requestEvent();
@@ -38,8 +47,10 @@ void initStepper(AccelStepper stepper, int maxSpeed, int Accel);
 void initOutPin(int pin, bool low);
 
 void setup() {
+#ifdef SERIAL_DEBUG
   Serial.begin(115200);
-  Serial.println("start 2");
+  Serial.println("Starting !");
+#endif
 
   for(int i=0; i<SERVO_COUNT; i++) {
     servos[i] = new servoControl; 
@@ -56,9 +67,9 @@ void setup() {
   initOutPin(PIN_STEPPER_SLEEP, false);
   initOutPin(PIN_STEPPER_RESET, false);
   delay(1); 
-  initStepper(steppers[0], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
-  initStepper(steppers[1], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
-  initStepper(steppers[2], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  for (int i = 0; i < STEPPER_COUNT; i++) {
+    initStepper(steppers[i], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
+  }
 
   initOutPin(PIN_ACTIONNEUR_1, false);
   initOutPin(PIN_ACTIONNEUR_2, false);
@@ -69,15 +80,12 @@ void setup() {
   initOutPin(PIN_MOTEURDC_REVERSE_2, true);
   initOutPin(PIN_MOTEURDC_FORWARD_2, true);
 
-  pinMode(PIN_SENSOR_1, INPUT_PULLUP);
-  pinMode(PIN_SENSOR_2, INPUT_PULLUP);
-  pinMode(PIN_SENSOR_3, INPUT_PULLUP);
-  pinMode(PIN_SENSOR_4, INPUT_PULLUP);
-  pinMode(PIN_SENSOR_5, INPUT_PULLUP);
-  pinMode(PIN_SENSOR_6, INPUT_PULLUP);
-
-  initOutPin(PIN_LED_1, true); 
-  initOutPin(PIN_LED_2, true);
+  for (int i = 0; i < SENSOR_COUNT; i++) {
+    initInPin(sensor_pins[i]);
+  }
+  for (int i = 0; i < SENSOR_COUNT; i++) {
+    initOutPin(led_pins[i], true); 
+  }
 
   Wire.begin(100);
   Wire.setTimeout(1000);
@@ -96,114 +104,79 @@ void loop() {
 }
 
 void receiveEvent(int numBytes) {
-  int i = 0;
-  while (Wire.available() > 0) {
-    if(i<BUFFERONRECEIVESIZE) {
-      onReceiveData[i] = Wire.read();
-      i++;
-    }
-    else {
-      Wire.read();
-    }
+  if (!Wire.available()) return;
+
+  Wire.readBytes(onReceiveData + onReceiveDataSize, numBytes);
+  onReceiveDataSize += numBytes;
+
+#ifdef SERIAL_DEBUG
+  Serial.print("Received: ");
+  for (int i = 0; i < onReceiveDataSize; i++) {
+    Serial.print(onReceiveData[i], HEX);
+    Serial.print(" ");
   }
+  Serial.println();
+#endif
 
   uint8_t* ptr = onReceiveData;
   uint8_t command = ReadInt8(&ptr);
   uint8_t number = ReadInt8(&ptr);
   switch(command) {
     case CMD_MOVE_SERVO:
+      if (number > SERVO_COUNT || number < 1) break;
       servos[number - 1].write(ReadInt8(&ptr));
       break;
     case CMD_MOVE_STEPPER:
+      if (number > STEPPER_COUNT || number < 1) break;
       steppers[number - 1].moveTo(ReadInt32(&ptr));
       break;
     case CMD_ENABLE_STEPPER: 
+      if (number > STEPPER_COUNT || number < 1) break;
       steppers[number - 1].enableOutputs();
       break;
     case CMD_DISABLE_STEPPER:
+      if (number > STEPPER_COUNT || number < 1) break;
       steppers[number - 1].disableOutputs();
       break;
     case CMD_LED_ON:
-      switch(number) {
-        case 1:  
-          digitalWrite(PIN_LED_1, HIGH);
-          break;
-        case 2:
-          digitalWrite(PIN_LED_2, HIGH);
-          break;
-        default:
-          break;
-      } 
+      if (number > LED_COUNT || number < 1) break;
+      digitalWrite(led_pins[number - 1], HIGH);
     case CMD_LED_OFF:
-      switch(number) {
-        case 1:
-          digitalWrite(PIN_LED_1, LOW);
-          break;
-        case 2:
-          digitalWrite(PIN_LED_2, LOW);
-          break;
-        default:
-          break;
-      }
+      if (number > LED_COUNT || number < 1) break;
+      digitalWrite(led_pins[number - 1], LOW);
       break;
-    case CMD_SET_STEPPER: // sets current position as the new zero
-      steppers[number - 1].setCurrentPosition(steppers[number - 1].currentPosition());
+    case CMD_SET_STEPPER: // Set the stepper position at the recieved posititon
+      steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
       break;
     default:
       break;      
   }
+  onReceiveDataSize -= ptr - onReceiveData;
 
   return;
 }
 
-void requestEvent() { // used to read sensor data 
-  uint8_t* ptr_receive = onReceiveData;
-  uint8_t* ptr_request = onRequestData;
-  int8_t command = ReadInt8(&ptr_receive);
-  uint8_t number = ReadInt8(&ptr_receive);
-  size_t byte_amount;
+void requestEvent() {
+#ifdef SERIAL_DEBUG
+  Serial.print("Request !");
+#endif
+  uint8_t* ptr = onReceiveData;
+  int8_t command = ReadInt8(&ptr);
+  uint8_t number = ReadInt8(&ptr);
+  uint8_t* resp_ptr = ResponseData;
 
   switch (command)
   {
     case CMD_GET_STEPPER:
-      WriteInt32(&ptr_request, steppers[number - 1].currentPosition());
-      byte_amount = 4;
+      WriteInt32(&resp_ptr, steppers[number - 1].currentPosition());
       break;
     case CMD_READ_SENSOR:
-      byte_amount = 1;
-      switch(number) {
-        case 1:
-          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_1));
-          break;
-        case 2:
-          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_2));
-          break;
-        case 3:
-          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_3));
-          break;
-        case 4:
-          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_4));
-          break;
-        case 5:
-          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_5));
-          break;
-        case 6:
-          WriteInt8(&ptr_request, digitalRead(PIN_SENSOR_6));
-          break;
-        case 7:
-          WriteInt8(&ptr_request, digitalRead(PIN_LED_1));
-          break;
-        case 8:
-          WriteInt8(&ptr_request, digitalRead(PIN_LED_2));
-          break;
-        default:
-          break;
-      }
+      WriteInt8(&resp_ptr, digitalRead(sensor_pins[number - 1]));
       break;
     default:
       break;
   }
-  Wire.write(onRequestData, byte_amount);
+  Wire.write(ResponseData, resp_ptr - ResponseData);
 }
 
 void initServo(servoControl servo, int pin, int min, int max, int initialPos) {
@@ -225,3 +198,8 @@ void initOutPin(int pin, bool low) {
   digitalWrite(pin, low ? LOW : HIGH);
   return;
 }
+
+void initInPin(int pin) {
+  pinMode(pin, INPUT_PULLUP);
+  return;
+} 

@@ -37,7 +37,7 @@ AccelStepper steppers[STEPPER_COUNT] = {
 servoControl servos[SERVO_COUNT];
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
-int onReceiveDataSize = 0;
+//int onReceiveDataSize = 0;
 uint8_t ResponseData[BUFFERONRECEIVESIZE];
 int ResponseDataSize = 0;
 
@@ -108,12 +108,12 @@ void loop() {
 void receiveEvent(int numBytes) {
   if (!Wire.available()) return;
 
-  Wire.readBytes(onReceiveData + onReceiveDataSize, numBytes);
-  onReceiveDataSize += numBytes;
+  Wire.readBytes(onReceiveData, numBytes);
+  //onReceiveDataSize += numBytes;
 
 #ifdef SERIAL_DEBUG
   Serial.print("Received: ");
-  for (int i = 0; i < onReceiveDataSize; i++) {
+  for (int i = 0; i < numBytes; i++) {
     Serial.print(onReceiveData[i], HEX);
     Serial.print(" ");
   }

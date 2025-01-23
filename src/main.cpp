@@ -158,7 +158,7 @@ void receiveEvent(int numBytes) {
       WriteInt32(&resp_ptr, steppers[number - 1].currentPosition());
       break;
     case CMD_READ_SENSOR:
-      WriteInt8(&resp_ptr, digitalRead(sensor_pins[number - 1]));
+      WriteInt8(&resp_ptr, !digitalRead(sensor_pins[number - 1]));
       break;
     default:
       break;      

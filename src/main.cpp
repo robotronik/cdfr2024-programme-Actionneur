@@ -7,7 +7,7 @@
 #include "servoControl.h"
 
 // Comment this line to disable serial debug
-#define SERIAL_DEBUG
+// #define SERIAL_DEBUG
 
 // TODO: move these defines later
 #define SERVO_COUNT 7

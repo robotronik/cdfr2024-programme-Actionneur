@@ -112,7 +112,7 @@ void receiveEvent(int numBytes) {
   //onReceiveDataSize += numBytes;
 
 #ifdef SERIAL_DEBUG
-  Serial.print("Received: ");
+  Serial.print("Received: 0x ");
   for (int i = 0; i < numBytes; i++) {
     Serial.print(onReceiveData[i], HEX);
     Serial.print(" ");
@@ -156,6 +156,11 @@ void receiveEvent(int numBytes) {
     // Request commands
     case CMD_GET_STEPPER:
       WriteInt32(&resp_ptr, steppers[number - 1].currentPosition());
+
+#ifdef SERIAL_DEBUG
+      Serial.print("Stepper value is :");
+      Serial.println(steppers[number - 1].currentPosition());
+#endif
       break;
     case CMD_READ_SENSOR:
       WriteInt8(&resp_ptr, !digitalRead(sensor_pins[number - 1]));
@@ -171,12 +176,19 @@ void receiveEvent(int numBytes) {
 
 void requestEvent() {
 #ifdef SERIAL_DEBUG
-  Serial.println("Request ! Sending: ");
+  Serial.print("Request ! Sending: 0x ");
   for (int i = 0; i < ResponseDataSize; i++) {
     Serial.print(ResponseData[i], HEX);
     Serial.print(" ");
   }
   Serial.println();
+  
+  if (ResponseDataSize == 4){
+    Serial.print("In long is :");
+    uint8_t* ptr = ResponseData;
+    long val = ReadInt32(&ptr);
+    Serial.println(val);
+  }
 #endif
 
   Wire.write(ResponseData, ResponseDataSize);

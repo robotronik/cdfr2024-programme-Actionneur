@@ -155,6 +155,7 @@ void receiveEvent(int numBytes) {
 
     // Request commands
     case CMD_GET_STEPPER:
+      if (number > STEPPER_COUNT || number < 1) break;
       WriteInt32(&resp_ptr, steppers[number - 1].currentPosition());
 
 #ifdef SERIAL_DEBUG
@@ -163,6 +164,7 @@ void receiveEvent(int numBytes) {
 #endif
       break;
     case CMD_READ_SENSOR:
+      if (number > SENSOR_COUNT || number < 1) break;
       WriteInt8(&resp_ptr, !digitalRead(sensor_pins[number - 1]));
       break;
     default:

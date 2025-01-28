@@ -2,7 +2,6 @@
 
 #include "Arduino.h"
 
-#define BUFFERONREQUESTSIZE 32
 #define BUFFERONRECEIVESIZE 32
 
 //Pin Servo moteur
@@ -13,7 +12,6 @@
 #define PIN_SERVOMOTEUR_5 11
 #define PIN_SERVOMOTEUR_6 10
 #define PIN_SERVOMOTEUR_7 13
-// #define PIN_SERVOMOTEUR_8 12
 
 //Pin Moteur pas a pas VALEUR HAUTE 2200 avec Microstep 1/8
 #define PIN_STEPPER_SLEEP 22
@@ -36,27 +34,25 @@
 #define PIN_ACTIONNEUR_3 43
 
 
-//Pin Moteur dc
+// DC Motor Pins
 #define PIN_MOTEURDC_REVERSE_1 45
 #define PIN_MOTEURDC_FORWARD_1 46
 
 #define PIN_MOTEURDC_REVERSE_2 44
 #define PIN_MOTEURDC_FORWARD_2 52
 
+// Sensor Pins
+#define PIN_SENSOR_1 32
+#define PIN_SENSOR_2 33
+#define PIN_SENSOR_3 34
+#define PIN_SENSOR_4 35
+#define PIN_SENSOR_5 36
+#define PIN_SENSOR_6 37
 
-//pin capteur
-#define PIN_CAPTEUR_1 32
-#define PIN_CAPTEUR_2 33
-#define PIN_CAPTEUR_3 34
-#define PIN_CAPTEUR_4 35
-#define PIN_CAPTEUR_5 36
-#define PIN_CAPTEUR_6 37
-#define PIN_CAPTEUR_7 38
-#define PIN_CAPTEUR_8 39
-#define PIN_CAPTEUR_PLANTE 12
+// LED Pins
+#define PIN_LED_1 38
+#define PIN_LED_2 39
 
 //configuration Stepper
 #define DEFAULT_MAX_SPEED 5000  // Vitesse maximale (en pas par seconde)
 #define DEFAULT_MAX_ACCEL 8000 // Accélération maximale (en pas par seconde carré)
-
-

@@ -125,14 +125,15 @@ void receiveEvent(int numBytes) {
 #endif
 
   uint8_t* ptr = onReceiveData;
-  uint8_t command = ReadInt8(&ptr);
-  uint8_t number = ReadInt8(&ptr);
+  uint8_t command = ReadUInt8(&ptr);
+  uint8_t number = ReadUInt8(&ptr);
 
   uint8_t* resp_ptr = ResponseData;// + ResponseDataSize; // For requests
   switch(command) {
     case CMD_MOVE_SERVO:
       if (number > SERVO_COUNT || number < 1) break;
-      servos[number - 1].write(ReadInt8(&ptr));
+      int val = ReadUInt8(&ptr);
+      servos[number - 1].write(val);
       break;
     case CMD_MOVE_STEPPER:
       if (number > STEPPER_COUNT || number < 1) break;
@@ -169,7 +170,7 @@ void receiveEvent(int numBytes) {
       break;
     case CMD_READ_SENSOR:
       if (number > SENSOR_COUNT || number < 1) break;
-      WriteInt8(&resp_ptr, !digitalRead(sensor_pins[number - 1]));
+      WriteUInt8(&resp_ptr, !digitalRead(sensor_pins[number - 1]));
       break;
     default:
       break;      

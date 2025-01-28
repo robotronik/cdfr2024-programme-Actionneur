@@ -127,13 +127,19 @@ void receiveEvent(int numBytes) {
   uint8_t* ptr = onReceiveData;
   uint8_t command = ReadUInt8(&ptr);
   uint8_t number = ReadUInt8(&ptr);
+  
+#ifdef SERIAL_DEBUG
+  Serial.print("Command: ");
+  Serial.println(command, HEX);
+  Serial.print("Number: ");
+  Serial.println(number);
+#endif
 
   uint8_t* resp_ptr = ResponseData;// + ResponseDataSize; // For requests
   switch(command) {
     case CMD_MOVE_SERVO:
       if (number > SERVO_COUNT || number < 1) break;
-      int val = ReadUInt8(&ptr);
-      servos[number - 1].write(val);
+      servos[number - 1].write(ReadUInt8(&ptr));
       break;
     case CMD_MOVE_STEPPER:
       if (number > STEPPER_COUNT || number < 1) break;

@@ -34,7 +34,15 @@ AccelStepper steppers[STEPPER_COUNT] = {
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3, PIN_STEPPER_ENABLE_3},
 };
 
-servoControl servos[SERVO_COUNT];
+servoControl servos[SERVO_COUNT] = {
+  servoControl(),
+  servoControl(),
+  servoControl(),
+  servoControl(),
+  servoControl(),
+  servoControl(),
+  servoControl()
+};
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 //int onReceiveDataSize = 0;
@@ -43,8 +51,8 @@ int ResponseDataSize = 0;
 
 void receiveEvent(int numBytes);
 void requestEvent();
-void initServo(servoControl servo, int pin, int min, int max, int initialPos);
-void initStepper(AccelStepper stepper, int maxSpeed, int Accel);
+void initServo(servoControl& servo, int pin, int min, int max, int initialPos);
+void initStepper(AccelStepper& stepper, int maxSpeed, int Accel);
 void initOutPin(int pin, bool low);
 void initInPin(int pin);
 
@@ -53,10 +61,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Starting !");
 #endif
-
-  for(int i=0; i<SERVO_COUNT; i++) {
-    servos[i] = new servoControl; 
-  }
 
   initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 0);
   initServo(servos[1], PIN_SERVOMOTEUR_2, 0, 180, 0);
@@ -197,14 +201,14 @@ void requestEvent() {
   ResponseDataSize = 0;
 }
 
-void initServo(servoControl servo, int pin, int min, int max, int initialPos) {
+void initServo(servoControl& servo, int pin, int min, int max, int initialPos) {
   servo.attach(pin);
   servo.setMinMaxValue(min, max);
   servo.write(initialPos);
   return;
 }
 
-void initStepper(AccelStepper stepper, int maxSpeed, int accel) {
+void initStepper(AccelStepper& stepper, int maxSpeed, int accel) {
   stepper.setMaxSpeed(maxSpeed);
   stepper.setAcceleration(accel);
   stepper.disableOutputs();

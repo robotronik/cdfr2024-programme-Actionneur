@@ -13,7 +13,7 @@
 // TODO: move these defines later
 #define SERVO_COUNT 7
 #define STEPPER_COUNT 3
-#define SENSOR_COUNT 6
+#define SENSOR_COUNT 5
 
 #define CMD_MOVE_SERVO 0x01
 #define CMD_READ_SENSOR 0x02
@@ -25,7 +25,7 @@
 #define CMD_GET_STEPPER 0x09
 
 RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
-const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6};
+const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5};
 
 AccelStepper steppers[STEPPER_COUNT] = { 
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1, PIN_STEPPER_ENABLE_1},

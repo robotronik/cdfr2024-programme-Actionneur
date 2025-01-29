@@ -43,16 +43,15 @@
 
 // Sensor Pins
 #define PIN_SENSOR_1 32
-#define PIN_SENSOR_2 33
-#define PIN_SENSOR_3 34
-#define PIN_SENSOR_4 35
-#define PIN_SENSOR_5 36
-#define PIN_SENSOR_6 37
+#define PIN_SENSOR_2 34
+#define PIN_SENSOR_3 35
+#define PIN_SENSOR_4 36
+#define PIN_SENSOR_5 37
 
 // LED Pins
-#define PIN_LED_1_R 38
-#define PIN_LED_1_G 39
-#define PIN_LED_1_B 0 // TODO
+#define PIN_LED_1_R 39
+#define PIN_LED_1_G 38
+#define PIN_LED_1_B 33
 
 //configuration Stepper
 #define DEFAULT_MAX_SPEED 5000  // Vitesse maximale (en pas par seconde)

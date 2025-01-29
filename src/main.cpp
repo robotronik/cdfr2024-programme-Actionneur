@@ -5,6 +5,7 @@
 #include "config.h"
 #include "utils.h"
 #include "servoControl.h"
+#include "RGB_LED.h"
 
 // Comment this line to disable serial debug
 // #define SERIAL_DEBUG
@@ -12,20 +13,18 @@
 // TODO: move these defines later
 #define SERVO_COUNT 7
 #define STEPPER_COUNT 3
-#define LED_COUNT 2
 #define SENSOR_COUNT 6
 
 #define CMD_MOVE_SERVO 0x01
 #define CMD_READ_SENSOR 0x02
 #define CMD_ENABLE_STEPPER 0x03
 #define CMD_DISABLE_STEPPER 0x04
-#define CMD_LED_ON 0x05
-#define CMD_LED_OFF 0x06
+#define CMD_RGB_LED 0x05
 #define CMD_MOVE_STEPPER 0x07
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
 
-const int led_pins[LED_COUNT] = {PIN_LED_1, PIN_LED_2};
+RGB_LED led(PIN_LED_1, PIN_LED_2, PIN_LED_3);
 const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6};
 
 AccelStepper steppers[STEPPER_COUNT] = { 
@@ -89,9 +88,6 @@ void setup() {
   for (int i = 0; i < SENSOR_COUNT; i++) {
     initInPin(sensor_pins[i]);
   }
-  for (int i = 0; i < LED_COUNT; i++) {
-    initOutPin(led_pins[i], true); 
-  }
 
   Wire.begin(100);
   Wire.setTimeout(1000);
@@ -107,6 +103,7 @@ void loop() {
   for(int stepperNb=0; stepperNb<STEPPER_COUNT; stepperNb++) {
     steppers[stepperNb].run();
   }
+  led.run();
 }
 
 void receiveEvent(int numBytes) {
@@ -153,13 +150,29 @@ void receiveEvent(int numBytes) {
       if (number > STEPPER_COUNT || number < 1) break;
       steppers[number - 1].disableOutputs();
       break;
-    case CMD_LED_ON:
-      if (number > LED_COUNT || number < 1) break;
-      digitalWrite(led_pins[number - 1], HIGH);
-    case CMD_LED_OFF:
-      if (number > LED_COUNT || number < 1) break;
-      digitalWrite(led_pins[number - 1], LOW);
-      break;
+    case CMD_RGB_LED:
+      if (number != 1) break;
+      uint8_t mode = ReadUInt8(&ptr);
+      led.setMode(mode);
+      switch (mode)
+      {
+      case MODE_SOLID:
+        uint8_t R = ReadUInt8(&ptr);
+        uint8_t G = ReadUInt8(&ptr);
+        uint8_t B = ReadUInt8(&ptr);
+        led.setColor(R, G, B);
+        break;
+      case MODE_BLINK:
+        uint8_t R = ReadUInt8(&ptr);
+        uint8_t G = ReadUInt8(&ptr);
+        uint8_t B = ReadUInt8(&ptr);
+        led.setColor(R, G, B);
+        break;
+      case MODE_RAINBOW:
+        break;      
+      default:
+        break;
+      }
     case CMD_SET_STEPPER: // Set the stepper position at the recieved posititon
       steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
       break;

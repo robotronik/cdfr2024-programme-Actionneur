@@ -24,7 +24,7 @@
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
 
-RGB_LED led(PIN_LED_1, PIN_LED_2, PIN_LED_3);
+RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
 const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6};
 
 AccelStepper steppers[STEPPER_COUNT] = { 
@@ -154,18 +154,19 @@ void receiveEvent(int numBytes) {
       if (number != 1) break;
       uint8_t mode = ReadUInt8(&ptr);
       led.setMode(mode);
+      uint8_t R, G, B;
       switch (mode)
       {
       case MODE_SOLID:
-        uint8_t R = ReadUInt8(&ptr);
-        uint8_t G = ReadUInt8(&ptr);
-        uint8_t B = ReadUInt8(&ptr);
+        R = ReadUInt8(&ptr);
+        G = ReadUInt8(&ptr);
+        B = ReadUInt8(&ptr);
         led.setColor(R, G, B);
         break;
       case MODE_BLINK:
-        uint8_t R = ReadUInt8(&ptr);
-        uint8_t G = ReadUInt8(&ptr);
-        uint8_t B = ReadUInt8(&ptr);
+        R = ReadUInt8(&ptr);
+        G = ReadUInt8(&ptr);
+        B = ReadUInt8(&ptr);
         led.setColor(R, G, B);
         break;
       case MODE_RAINBOW:

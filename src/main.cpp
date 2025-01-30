@@ -152,37 +152,16 @@ void receiveEvent(int numBytes) {
       break;
     case CMD_RGB_LED:
       if (number != 1) break;
-      uint8_t mode = ReadUInt8(&ptr);
-      led.setMode(mode);
-      uint8_t R, G, B;
-      switch (mode)
-      {
-      case MODE_SOLID:
-        R = ReadUInt8(&ptr);
-        G = ReadUInt8(&ptr);
-        B = ReadUInt8(&ptr);
-        led.setColor(R, G, B);
-        break;
-      case MODE_BLINK:
-        R = ReadUInt8(&ptr);
-        G = ReadUInt8(&ptr);
-        B = ReadUInt8(&ptr);
-        led.setColor(R, G, B);
-        break;
-      case MODE_RAINBOW:
-        break;      
-      default:
-        break;
-      }
+      led.recieveData(ptr);
+      break; 
     case CMD_SET_STEPPER: // Set the stepper position at the recieved posititon
       steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
       break;
-
+      
     // Request commands
     case CMD_GET_STEPPER:
       if (number > STEPPER_COUNT || number < 1) break;
       WriteInt32(&resp_ptr, steppers[number - 1].currentPosition());
-
 #ifdef SERIAL_DEBUG
       Serial.print("Stepper value is :");
       Serial.println(steppers[number - 1].currentPosition());

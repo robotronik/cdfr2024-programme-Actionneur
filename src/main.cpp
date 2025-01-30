@@ -247,6 +247,7 @@ void setFastPWM(uint8_t val){
   }
   else{
     TCCR1A |= _BV(COM1B1); // Re-enable PWM on OC1B
-    OCR1B = (uint16_t)((int)(val) * 800 / 255);
+    ICR1 = 800;  // Sets PWM frequency to 20kHz
+    OCR1B = (uint16_t)(val) * 3;
   }
 }

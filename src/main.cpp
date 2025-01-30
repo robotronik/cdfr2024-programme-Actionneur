@@ -55,6 +55,7 @@ void initServo(servoControl& servo, int pin, int min, int max, int initialPos);
 void initStepper(AccelStepper& stepper, int maxSpeed, int Accel);
 void initOutPin(int pin, bool low);
 void initInPin(int pin);
+void setFastPWM(uint8_t val);
 
 void setup() {
 #ifdef SERIAL_DEBUG
@@ -82,6 +83,12 @@ void setup() {
   initOutPin(PIN_ACTIONNEUR_3, false);
 
   initOutPin(PIN_PWM_LIDAR, true);
+  // Configure Timer1 for Fast PWM Mode, Non-inverting, No prescaler
+  TCCR1A = _BV(COM1B1) | _BV(WGM11);
+  TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS10);
+  ICR1 = 800;  // Sets PWM frequency to 20kHz
+  setFastPWM(0);
+  // Also affects pin 10 and 11
 
   initOutPin(PIN_MOTEURDC_REVERSE_1, true);
   initOutPin(PIN_MOTEURDC_FORWARD_1, true);
@@ -158,7 +165,7 @@ void receiveEvent(int numBytes) {
       led.recieveData(ptr);
       break; 
     case CMD_SET_PWM_LIDAR:
-      analogWrite(PIN_PWM_LIDAR, ReadUInt8(&ptr));
+      setFastPWM(number);
       break;
     case CMD_SET_STEPPER: // Set the stepper position at the recieved posititon
       steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
@@ -231,3 +238,15 @@ void initInPin(int pin) {
   pinMode(pin, INPUT_PULLUP);
   return;
 } 
+
+void setFastPWM(uint8_t val){
+  if (val == 0){
+    OCR1B = 0x0000;
+    TCCR1A &= ~_BV(COM1B1); // Disconnect OC1B (PWM stops)
+    digitalWrite(PIN_PWM_LIDAR, LOW);
+  }
+  else{
+    TCCR1A |= _BV(COM1B1); // Re-enable PWM on OC1B
+    OCR1B = (uint16_t)((int)(val) * 800 / 255);
+  }
+}

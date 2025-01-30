@@ -17,23 +17,23 @@ RGB_LED::~RGB_LED(){
     digitalWrite(pinB, LOW);
 }
 
-void RGB_LED::recieveData(uint8_t* data){
-    uint8_t mode = ReadUInt8(&data);
-    setMode(mode);
-    uint8_t R, G, B;
-    switch (mode)
+void RGB_LED::recieveData(unsigned char* data){
+    uint8_t _mode = ReadUInt8(&data);
+    setMode(_mode);
+    uint8_t _R, _G, _B;
+    switch (_mode)
     {
     case MODE_SOLID:
-        R = ReadUInt8(&data);
-        G = ReadUInt8(&data);
-        B = ReadUInt8(&data);
-        setColor(R, G, B);
+        _R = ReadUInt8(&data);
+        _G = ReadUInt8(&data);
+        _B = ReadUInt8(&data);
+        setColor(_R, _G, _B);
         break;
     case MODE_BLINK:
-        R = ReadUInt8(&data);
-        G = ReadUInt8(&data);
-        B = ReadUInt8(&data);
-        setColor(R, G, B);
+        _R = ReadUInt8(&data);
+        _G = ReadUInt8(&data);
+        _B = ReadUInt8(&data);
+        setColor(_R, _G, _B);
         break;
     case MODE_RAINBOW:
         break;      
@@ -54,7 +54,8 @@ void RGB_LED::run(){
             blink();
             break;
         case MODE_RAINBOW:
-            rainbow();
+            if (counter % 128 == 0)
+                rainbow();
             break;
         default:
             mode = MODE_SOLID;

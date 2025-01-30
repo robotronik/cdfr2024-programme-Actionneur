@@ -9,7 +9,7 @@ public :
     RGB_LED(int pinR, int pinG, int pinB);
     ~RGB_LED();
     void run();
-    void recieveData(uint8_t* data);
+    void recieveData(unsigned char* data);
 private :
     unsigned char R, G, B;
     unsigned char R_S, G_S, B_S;

@@ -20,6 +20,7 @@
 #define CMD_ENABLE_STEPPER 0x03
 #define CMD_DISABLE_STEPPER 0x04
 #define CMD_RGB_LED 0x05
+#define CMD_SET_PWM_LIDAR 0x06
 #define CMD_MOVE_STEPPER 0x07
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
@@ -79,6 +80,8 @@ void setup() {
   initOutPin(PIN_ACTIONNEUR_1, false);
   initOutPin(PIN_ACTIONNEUR_2, false);
   initOutPin(PIN_ACTIONNEUR_3, false);
+
+  initOutPin(PIN_PWM_LIDAR, true);
 
   initOutPin(PIN_MOTEURDC_REVERSE_1, true);
   initOutPin(PIN_MOTEURDC_FORWARD_1, true);
@@ -154,6 +157,9 @@ void receiveEvent(int numBytes) {
       if (number != 1) break;
       led.recieveData(ptr);
       break; 
+    case CMD_SET_PWM_LIDAR:
+      analogWrite(PIN_PWM_LIDAR, ReadUInt8(&ptr));
+      break;
     case CMD_SET_STEPPER: // Set the stepper position at the recieved posititon
       steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
       break;

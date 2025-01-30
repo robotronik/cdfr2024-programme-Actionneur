@@ -53,6 +53,9 @@
 #define PIN_LED_1_G 38
 #define PIN_LED_1_B 33
 
+// PWM Lidar
+#define PIN_PWM_LIDAR 12
+
 //configuration Stepper
 #define DEFAULT_MAX_SPEED 5000  // Vitesse maximale (en pas par seconde)
 #define DEFAULT_MAX_ACCEL 8000 // Accélération maximale (en pas par seconde carré)

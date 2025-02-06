@@ -12,8 +12,8 @@
 
 // TODO: move these defines later
 #define SERVO_COUNT 7
-#define STEPPER_COUNT 3
-#define SENSOR_COUNT 5
+#define STEPPER_COUNT 4
+#define SENSOR_COUNT 8
 
 #define CMD_MOVE_SERVO 0x01
 #define CMD_READ_SENSOR 0x02
@@ -26,12 +26,13 @@
 #define CMD_GET_STEPPER 0x09
 
 RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
-const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5};
+const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6, PIN_SENSOR_7, PIN_SENSOR_8};
 
 AccelStepper steppers[STEPPER_COUNT] = { 
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1, PIN_STEPPER_ENABLE_1},
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_2, PIN_STEPPER_DIR_2, PIN_STEPPER_ENABLE_2},
   {AccelStepper::DRIVER, PIN_STEPPER_STEP_3, PIN_STEPPER_DIR_3, PIN_STEPPER_ENABLE_3},
+  {AccelStepper::DRIVER, PIN_STEPPER_STEP_4, PIN_STEPPER_DIR_4, PIN_STEPPER_ENABLE_4},
 };
 
 servoControl servos[SERVO_COUNT] = {
@@ -79,8 +80,6 @@ void setup() {
   initStepper(steppers[2], DEFAULT_MAX_SPEED/4, DEFAULT_MAX_ACCEL/4);
 
   initOutPin(PIN_ACTIONNEUR_1, false);
-  initOutPin(PIN_ACTIONNEUR_2, false);
-  initOutPin(PIN_ACTIONNEUR_3, false);
 
   initOutPin(PIN_PWM_LIDAR, true);
   // Configure Timer1 for Fast PWM Mode, Non-inverting, No prescaler
@@ -92,8 +91,6 @@ void setup() {
 
   initOutPin(PIN_MOTEURDC_REVERSE_1, true);
   initOutPin(PIN_MOTEURDC_FORWARD_1, true);
-  initOutPin(PIN_MOTEURDC_REVERSE_2, true);
-  initOutPin(PIN_MOTEURDC_FORWARD_2, true);
 
   for (int i = 0; i < SENSOR_COUNT; i++) {
     initInPin(sensor_pins[i]);

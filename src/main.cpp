@@ -25,7 +25,7 @@
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
 #define CMD_SET_MOSFET 0x0A
-#define CMD_SET_DCMOTOR 0x0A
+#define CMD_SET_DCMOTOR 0x0B
 
 RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
 const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6, PIN_SENSOR_7, PIN_SENSOR_8};
@@ -84,12 +84,14 @@ void setup() {
   initStepper(steppers[2], DEFAULT_MAX_SPEED/4, DEFAULT_MAX_ACCEL/4);
 
   initOutPin(PIN_ACTIONNEUR_1, false);
+  setPWM_P44(0);
 
   initOutPin(PIN_PWM_LIDAR, true);
-  setFastPWM(0);
+  setPWM_P46(0);
 
   initOutPin(PIN_MOTEURDC_REVERSE_1, true);
   initOutPin(PIN_MOTEURDC_FORWARD_1, true);
+  setPWM_P45(0);
 
   for (int i = 0; i < SENSOR_COUNT; i++) {
     initInPin(sensor_pins[i]);
@@ -177,7 +179,7 @@ void receiveEvent(int numBytes) {
         analogWrite(PIN_MOTEURDC_REVERSE_1, 0);
       } else { // Reverse
         setPWM_P45(0);
-        analogWrite(PIN_MOTEURDC_REVERSE_1, pwm);
+        analogWrite(PIN_MOTEURDC_REVERSE_1, number);
       }
       break;
       

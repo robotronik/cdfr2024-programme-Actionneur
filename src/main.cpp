@@ -14,7 +14,7 @@
 #define SERVO_COUNT 7
 #define STEPPER_COUNT 4
 #define SENSOR_COUNT 8
-
+ 
 #define CMD_MOVE_SERVO 0x01
 #define CMD_READ_SENSOR 0x02
 #define CMD_ENABLE_STEPPER 0x03
@@ -172,7 +172,7 @@ void receiveEvent(int numBytes) {
     case CMD_SET_MOSFET: // Set the mosfet pwm to the recieved value
       setPWM_P44(number);
       break;
-    case CMD_SET_DCMOTOR: // Set the dc motor bridge to the recieved value and direction
+    case CMD_SET_DCMOTOR: {// Set the dc motor bridge to the recieved value and direction
       uint8_t direction = ReadUInt8(&ptr);
       if (direction == 0) { // Forward
         setPWM_P45(number);
@@ -182,7 +182,8 @@ void receiveEvent(int numBytes) {
         analogWrite(PIN_MOTEURDC_REVERSE_1, number);
       }
       break;
-      
+    }
+     
     // Request commands
     case CMD_GET_STEPPER:
       if (number > STEPPER_COUNT || number < 1) break;

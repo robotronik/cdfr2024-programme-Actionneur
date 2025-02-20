@@ -9,6 +9,7 @@ RGB_LED::RGB_LED(int pinR, int pinG, int pinB){
     this->pinR = pinR;
     this->pinG = pinG;
     this->pinB = pinB;
+    setColor(0,0,0);
 }
 
 RGB_LED::~RGB_LED(){

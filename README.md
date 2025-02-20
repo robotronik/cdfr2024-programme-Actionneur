@@ -21,9 +21,9 @@ This project is an Arduino-based robotic system controller designed to manage mu
 
 - **Hardware**:
   - 7 servo motors
-  - 3 stepper motors (driver mode)
-  - 2 LEDs
-  - 6 digital sensors
+  - 4 stepper motors (driver mode)
+  - 1 RGB LED
+  - 8 digital sensors
 
 ## Commands
 

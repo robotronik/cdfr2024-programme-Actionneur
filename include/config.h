@@ -50,9 +50,9 @@
 #define PIN_SENSOR_8 39
 
 // LED Pins
-#define PIN_LED_1_R 66 //A12
+#define PIN_LED_1_B 66 //A12
 #define PIN_LED_1_G 65 //A11
-#define PIN_LED_1_B 64 //A10
+#define PIN_LED_1_R 64 //A10
 
 // PWM Lidar
 #define PIN_PWM_LIDAR 46

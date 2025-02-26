@@ -5,9 +5,9 @@ This project is an Arduino-based robotic system controller designed to manage mu
 ## Features
 
 - **Servo Motor Control**: Supports up to 7 servo motors, allowing position adjustments with defined ranges.
-- **Stepper Motor Control**: Supports up to 3 stepper motors, including position setting, movement, and enabling/disabling outputs.
-- **LED Control**: Supports up to 2 LEDs with on/off commands.
-- **Sensor Monitoring**: Reads the state of up to 6 digital sensors.
+- **Stepper Motor Control**: Supports up to 4 stepper motors, including position setting, movement, and enabling/disabling outputs.
+- **RGB LED Control**: Supports an RGB LED with dimming.
+- **Sensor Monitoring**: Reads the state of up to 8 digital sensors.
 - **I2C Communication**: Listens for commands and sends responses over the I2C bus.
 - **Debugging**: Optional serial debugging for monitoring system activity.
 

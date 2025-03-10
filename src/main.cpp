@@ -68,13 +68,13 @@ void setup() {
   Serial.println("Starting !");
 #endif
 
-  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 0);
-  initServo(servos[1], PIN_SERVOMOTEUR_2, 0, 180, 0);
-  initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 180, 0);
-  initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 0);
-  initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 180, 0);
-  initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 180, 0);
-  initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 180, 0);
+  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 250, 0);
+  initServo(servos[1], PIN_SERVOMOTEUR_2, 50, 140, 140);
+  initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 90, 0);
+  initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 180);
+  initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 250, 0);
+  initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 250, 0);
+  initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 250, 0);
 
   initOutPin(PIN_STEPPER_SLEEP, false);
   initOutPin(PIN_STEPPER_RESET, false);
@@ -257,9 +257,9 @@ void initInPin(int pin) {
 
 // Configure Timer5 for Fast PWM Mode, Non-inverting, No prescaler (PWM Pin 44, 45 and 46)
 void configTMR5(){
-    TCCR5A = _BV(WGM51);
-    TCCR5B = _BV(WGM53) | _BV(WGM52) | _BV(CS50);
-    ICR5 = 800;  // Sets PWM frequency to 20kHz
+    // TCCR5A = _BV(WGM51) | _BV(WGM50) | _BV(COM5A1) | _BV(COM5B1) | _BV(COM5C1);
+    // TCCR5B = _BV(WGM53) | _BV(WGM52) | _BV(CS50);
+    // ICR5 = 800;  // 20kHz PWM frequency
 }
 
 void setPWM_P44(uint8_t val){
@@ -287,6 +287,8 @@ void setPWM_P45(uint8_t val){
   }
 }
 void setPWM_P46(uint8_t val){
+  digitalWrite(46, val == 0 ? LOW : HIGH);
+  /*
   if (val == 0){
     OCR5C = 0x0000;
     TCCR5A &= ~_BV(COM5C1);
@@ -297,4 +299,5 @@ void setPWM_P46(uint8_t val){
     TCCR5A |= _BV(COM5C1);
     OCR5C = (uint16_t)(val) * 32 / 10;
   }
+  */
 }

@@ -82,6 +82,7 @@ void setup() {
   initStepper(steppers[0], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
   initStepper(steppers[1], DEFAULT_MAX_SPEED/2, DEFAULT_MAX_ACCEL/2);
   initStepper(steppers[2], DEFAULT_MAX_SPEED/4, DEFAULT_MAX_ACCEL/4);
+  initStepper(steppers[3], DEFAULT_MAX_SPEED/4, DEFAULT_MAX_ACCEL/4);
 
   initOutPin(PIN_ACTIONNEUR_1, false);
   setPWM_P44(0);

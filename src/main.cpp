@@ -55,7 +55,7 @@ int ResponseDataSize = 0;
 void receiveEvent(int numBytes);
 void requestEvent();
 void initServo(servoControl& servo, int pin, int min, int max, int initialPos);
-void initStepper(AccelStepper& stepper, int maxSpeed, int Accel);
+void initStepper(AccelStepper& stepper, int maxSpeed, int Accel, int enablePin);
 void initOutPin(int pin, bool low);
 void initInPin(int pin);
 void setPWM_P44(uint8_t val);
@@ -79,10 +79,10 @@ void setup() {
   initOutPin(PIN_STEPPER_SLEEP, false);
   initOutPin(PIN_STEPPER_RESET, false);
   delay(1); 
-  initStepper(steppers[0], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL);
-  initStepper(steppers[1], DEFAULT_MAX_SPEED/2, DEFAULT_MAX_ACCEL/2);
-  initStepper(steppers[2], DEFAULT_MAX_SPEED/4, DEFAULT_MAX_ACCEL/4);
-  initStepper(steppers[3], DEFAULT_MAX_SPEED/4, DEFAULT_MAX_ACCEL/4);
+  initStepper(steppers[0], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL ,   PIN_STEPPER_ENABLE_1);
+  initStepper(steppers[1], DEFAULT_MAX_SPEED/8, DEFAULT_MAX_ACCEL/8, PIN_STEPPER_ENABLE_2);
+  initStepper(steppers[2], DEFAULT_MAX_SPEED/3, DEFAULT_MAX_ACCEL/3, PIN_STEPPER_ENABLE_3);
+  initStepper(steppers[3], DEFAULT_MAX_SPEED/3, DEFAULT_MAX_ACCEL/3, PIN_STEPPER_ENABLE_4);
 
   initOutPin(PIN_ACTIONNEUR_1, false);
   setPWM_P44(0);
@@ -235,9 +235,11 @@ void initServo(servoControl& servo, int pin, int min, int max, int initialPos) {
   return;
 }
 
-void initStepper(AccelStepper& stepper, int maxSpeed, int accel) {
+void initStepper(AccelStepper& stepper, int maxSpeed, int accel, int enablePin) {
   stepper.setMaxSpeed(maxSpeed);
   stepper.setAcceleration(accel);
+  stepper.setEnablePin(enablePin);
+  stepper.setPinsInverted(false, false, true);
   stepper.disableOutputs();
   return;
 }

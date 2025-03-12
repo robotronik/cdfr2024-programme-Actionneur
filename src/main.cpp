@@ -145,7 +145,7 @@ void receiveEvent(int numBytes) {
   switch(command) {
     case CMD_MOVE_SERVO:
       if (number > SERVO_COUNT || number < 1) break;
-      servos[number - 1].write(ReadUInt8(&ptr));
+      servos[number - 1].target(ReadUInt8(&ptr), 90);
       break;
     case CMD_MOVE_STEPPER:
       if (number > STEPPER_COUNT || number < 1) break;
@@ -190,8 +190,8 @@ void receiveEvent(int numBytes) {
       if (number > STEPPER_COUNT || number < 1) break;
       WriteInt32(&resp_ptr, steppers[number - 1].currentPosition());
 #ifdef SERIAL_DEBUG
-      Serial.print("Stepper value is :");
-      Serial.println(steppers[number - 1].currentPosition());
+      // Serial.print("Stepper value is :");
+      // Serial.println(steppers[number - 1].currentPosition());
 #endif
       break;
     case CMD_READ_SENSOR:
@@ -231,7 +231,7 @@ void requestEvent() {
 void initServo(servoControl& servo, int pin, int min, int max, int initialPos) {
   servo.attach(pin);
   servo.setMinMaxValue(min, max);
-  servo.write(initialPos);
+  servo.target(initialPos, 0);
   return;
 }
 

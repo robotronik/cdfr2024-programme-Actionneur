@@ -69,8 +69,8 @@ void setup() {
 #endif
 
   initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 250, 0);
-  initServo(servos[1], PIN_SERVOMOTEUR_2, 50, 140, 140);
-  initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 90, 0);
+  initServo(servos[1], PIN_SERVOMOTEUR_2, 20, 140, 140);
+  initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 120, 0);
   initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 180);
   initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 250, 0);
   initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 250, 0);

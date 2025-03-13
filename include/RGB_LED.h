@@ -10,13 +10,13 @@ public :
     ~RGB_LED();
     void run();
     void recieveData(unsigned char* data);
+    void setColor(unsigned char R, unsigned char G, unsigned char B);
+    void setMode(unsigned char mode);
 private :
     unsigned char R, G, B;
     unsigned char R_S, G_S, B_S;
     unsigned char mode;
     int pinR, pinG, pinB;
-    void setColor(unsigned char R, unsigned char G, unsigned char B);
-    void setMode(unsigned char mode);
     void solid();
     void blink();
     void rainbow();

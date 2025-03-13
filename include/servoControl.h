@@ -11,7 +11,7 @@ private:
     int maxVal = 180;
 
     // Variables to handle slow movement
-    uint16_t move_time = 300; // time of servo movement in milli seconds
+    uint32_t move_time = 300; // time of servo movement in milli seconds
     unsigned long move_start_time;
     int start_angle = -1;
     int target_angle;

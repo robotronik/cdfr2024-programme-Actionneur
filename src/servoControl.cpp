@@ -1,7 +1,7 @@
 #include "servoControl.h"
 
-#define MIN_PULSE 55
-#define MAX_PULSE 284
+#define MIN_PULSE 500
+#define MAX_PULSE 2500
 
 servoControl::servoControl()
 {
@@ -29,7 +29,7 @@ void servoControl::target(int val, uint16_t speed)
         move_start_time = millis();
         target_angle = val;
         start_angle = current_angle;
-        move_time = abs(target_angle - start_angle) * 1000 / speed;
+        move_time = (uint32_t)(abs(target_angle - start_angle)) * 1000 / speed;
         is_slow_moving = true;
         run();
     }
@@ -41,26 +41,27 @@ void servoControl::write(int val)
     int pulse = map(val, 0, 180, MIN_PULSE, MAX_PULSE);
     servo.writeMicroseconds(pulse);
     // servo.write(val);
+    
+    // Serial.println(val);
 }
 
 void servoControl::run(void)
 {
     if (!is_slow_moving)
         return;
-        
+
     unsigned long progress = millis() - move_start_time;
     if (progress < move_time)
     {
         int angle = map(progress, 0, move_time, start_angle, target_angle);
-        write(angle);
-        Serial.println(angle);
+        if (angle != current_angle)
+            write(angle);
     }
     else
     {
         // Done moving
         is_slow_moving = false;
         write(target_angle);
-        Serial.println(target_angle);
     }
 }
 

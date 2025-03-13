@@ -68,13 +68,13 @@ void setup()
   Serial.println("Starting !");
 #endif
 
-  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 250, 0);
+  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 270, 0);
   initServo(servos[1], PIN_SERVOMOTEUR_2, 20, 140, 140);
   initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 120, 0);
   initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 180);
-  initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 250, 0);
-  initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 250, 0);
-  initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 250, 0);
+  initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 270, 0);
+  initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 270, 0);
+  initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 270, 0);
 
   initOutPin(PIN_STEPPER_SLEEP, false);
   initOutPin(PIN_STEPPER_RESET, false);

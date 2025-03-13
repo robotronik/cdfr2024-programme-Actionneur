@@ -148,12 +148,14 @@ void receiveEvent(int numBytes)
   switch (command)
   {
   case CMD_MOVE_SERVO:
+  {
     if (number > SERVO_COUNT || number < 1)
       break;
     uint16_t s_target = ReadUInt16(&ptr);
     uint16_t s_speed = ReadUInt16(&ptr);
     servos[number - 1].target(s_target, s_speed);
     break;
+  }
   case CMD_MOVE_STEPPER:
     if (number > STEPPER_COUNT || number < 1)
       break;

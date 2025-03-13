@@ -150,7 +150,9 @@ void receiveEvent(int numBytes)
   case CMD_MOVE_SERVO:
     if (number > SERVO_COUNT || number < 1)
       break;
-    servos[number - 1].target(ReadUInt8(&ptr), 90);
+    uint16_t target = ReadUInt16(&ptr);
+    uint16_t speed = ReadUInt16(&ptr);
+    servos[number - 1].target(target, speed);
     break;
   case CMD_MOVE_STEPPER:
     if (number > STEPPER_COUNT || number < 1)

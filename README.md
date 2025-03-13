@@ -31,14 +31,14 @@ The controller supports the following commands:
 
 | Command               | Code  | Description                                   |
 |-----------------------|-------|-----------------------------------------------|
-| `CMD_MOVE_SERVO`      | 0x01  | Move a specific servo motor to a position.   |
-| `CMD_READ_SENSOR`     | 0x02  | Read the state of a specified sensor.        |
-| `CMD_ENABLE_STEPPER`  | 0x03  | Enable outputs for a specific stepper motor. |
-| `CMD_DISABLE_STEPPER` | 0x04  | Disable outputs for a specific stepper motor.|
-| `CMD_RGB_LED`         | 0x05  | Controls the RGB LED                         |
-| `CMD_MOVE_STEPPER`    | 0x07  | Move a specific stepper motor to a position. |
-| `CMD_SET_STEPPER`     | 0x08  | Set a stepper motor's current position.      |
-| `CMD_GET_STEPPER`     | 0x09  | Get the current position of a stepper motor. |
+| `CMD_MOVE_SERVO`      | 0x01  | Move a specific servo to a position at speed. |
+| `CMD_READ_SENSOR`     | 0x02  | Read the state of a specified sensor.         |
+| `CMD_ENABLE_STEPPER`  | 0x03  | Enable outputs for a specific stepper motor.  |
+| `CMD_DISABLE_STEPPER` | 0x04  | Disable outputs for a specific stepper motor. |
+| `CMD_RGB_LED`         | 0x05  | Controls the RGB LED                          |
+| `CMD_MOVE_STEPPER`    | 0x07  | Move a specific stepper motor to a position.  |
+| `CMD_SET_STEPPER`     | 0x08  | Set a stepper motor's current position.       |
+| `CMD_GET_STEPPER`     | 0x09  | Get the current position of a stepper motor.  |
 
 ### Message Structure
 

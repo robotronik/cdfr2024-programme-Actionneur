@@ -253,8 +253,7 @@ void requestEvent()
 
 void initServo(servoControl &servo, int pin, int min, int max, int initialPos)
 {
-  servo.attach(pin);
-  servo.setMinMaxValue(min, max);
+  servo.attach(pin, min, max);
   servo.target(initialPos, 0);
   return;
 }

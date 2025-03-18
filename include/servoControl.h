@@ -18,12 +18,10 @@ private:
     int current_angle = -1;
     bool is_slow_moving = false;
 public:
-    servoControl();
-    void setMinMaxValue(int min, int max);
-    
+    servoControl();    
     void target(int val, uint16_t speed);
     void run();
-    uint8_t attach(int pin);
+    uint8_t attach(int pin, int min, int max);
     ~servoControl();
 
 private:

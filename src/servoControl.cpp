@@ -6,11 +6,6 @@
 servoControl::servoControl()
 {
 }
-void servoControl::setMinMaxValue(int min, int max)
-{
-    minVal = min;
-    maxVal = max;
-}
 
 // Speed in deg/s
 void servoControl::target(int val, uint16_t speed)
@@ -65,9 +60,11 @@ void servoControl::run(void)
     }
 }
 
-uint8_t servoControl::attach(int pin)
+uint8_t servoControl::attach(int pin, int min, int max)
 {
-    return servo.attach(pin);
+    minVal = min;
+    maxVal = max;
+    return servo.attach(pin, min, max);
 }
 
 servoControl::~servoControl()

@@ -64,7 +64,9 @@ uint8_t servoControl::attach(int pin, int min, int max)
 {
     minVal = min;
     maxVal = max;
-    return servo.attach(pin, min, max);
+    int min_pulse = map(min, 0, 180, MIN_PULSE, MAX_PULSE);
+    int max_pulse = map(max, 0, 180, MIN_PULSE, MAX_PULSE);
+    return servo.attach(pin, min_pulse, max_pulse);
 }
 
 servoControl::~servoControl()

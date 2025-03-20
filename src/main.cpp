@@ -92,9 +92,9 @@ void setup()
   // initOutPin(PIN_MOTEURDC_REVERSE_1, true);
   initOutPin(PIN_MOTEURDC_FORWARD_1, true);
 
-  setPWM_P44(0);
-  setPWM_P46(0);
-  setPWM_P45(0);
+  setPWM_P44(0); // PIN_ACTIONNEUR_1
+  setPWM_P45(0); // PIN_MOTEURDC_REVERSE_1 15/255:maintient
+  setPWM_P46(0); // PIN_PWM_LIDAR
 
   // Enable non-inverting PWM for all channels
   TCCR5A |= (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
@@ -299,14 +299,17 @@ void configTMR5() {
 
 // Set PWM for pin 44 (0-255)
 void setPWM_P44(uint8_t val) {
-  OCR5A = map(val, 0, 255, 0, ICR5);
+  OCR5C = map(val, 0, 255, 0, ICR5);
+  pinMode(44, val == 0 ? INPUT : OUTPUT);
 }
 
 // Repeat for pins 45 and 46
 void setPWM_P45(uint8_t val) {
   OCR5B = map(val, 0, 255, 0, ICR5);
+  pinMode(45, val == 0 ? INPUT : OUTPUT);
 }
 
 void setPWM_P46(uint8_t val) {
-  OCR5C = map(val, 0, 255, 0, ICR5);
+  OCR5A = map(val, 0, 255, 0, ICR5);
+  pinMode(46, val == 0 ? INPUT : OUTPUT);
 }

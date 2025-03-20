@@ -45,8 +45,7 @@ void RGB_LED::recieveData(unsigned char* data){
 
 void RGB_LED::run(){
     static unsigned char counter = 0;
-    setLED(counter < R, counter < G, counter < B);
-    counter++;
+    setLED(counter < (R / 2), counter < (G / 2), counter < (B / 2));
     switch(mode){
         case MODE_SOLID:
             solid();
@@ -55,13 +54,16 @@ void RGB_LED::run(){
             blink();
             break;
         case MODE_RAINBOW:
-            if (counter % 128 == 0)
+            if (counter == 0)
                 rainbow();
             break;
         default:
             mode = MODE_SOLID;
             break;
     }
+    counter++;
+    if (counter == 128)
+        counter = 0;
 }
 
 void RGB_LED::setColor(unsigned char R, unsigned char G, unsigned char B){

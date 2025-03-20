@@ -25,6 +25,21 @@ This project is an Arduino-based robotic system controller designed to manage mu
   - 1 RGB LED
   - 8 digital sensors
 
+
+## !!!!! WARNING !!!!!
+
+You need to change the file Servo/src/avr/ServoTimers.h to remove the timer5
+
+```cpp
+// Say which 16 bit timers can be used and in what order
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+// #define _useTimer5
+#define _useTimer1
+#define _useTimer3
+#define _useTimer4
+typedef enum { /*_timer5, */ _timer1, _timer3, _timer4, _Nbr_16timers } timer16_Sequence_t;
+```
+
 ## Commands
 
 The controller supports the following commands:

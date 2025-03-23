@@ -6,6 +6,8 @@
 #include "utils.h"
 #include "servoControl.h"
 #include "RGB_LED.h"
+#include "MotorDC.h"
+#include "timer5PWM.h"
 
 // Comment this line to disable serial debug
 // #define SERIAL_DEBUG
@@ -25,7 +27,8 @@
 #define CMD_SET_STEPPER 0x08
 #define CMD_GET_STEPPER 0x09
 #define CMD_SET_MOSFET 0x0A
-#define CMD_SET_DCMOTOR 0x0B
+#define CMD_MOVE_DC_MOTOR 0x0B
+#define CMD_STOP_DC_MOTOR 0x0C
 
 RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
 const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6, PIN_SENSOR_7, PIN_SENSOR_8};
@@ -46,6 +49,8 @@ servoControl servos[SERVO_COUNT] = {
     servoControl(),
     servoControl()};
 
+MotorDC motorDC(PIN_MOTEURDC_REVERSE_1, PIN_MOTEURDC_FORWARD_1, PIN_SENSOR_8, false);
+
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 // int onReceiveDataSize = 0;
 uint8_t ResponseData[BUFFERONRECEIVESIZE];
@@ -57,10 +62,6 @@ void initServo(servoControl &servo, int pin, int min, int max, int initialPos);
 void initStepper(AccelStepper &stepper, int maxSpeed, int Accel, int enablePin);
 void initOutPin(int pin, bool low);
 void initInPin(int pin);
-void configTMR5();
-void setPWM_P44(uint8_t val);
-void setPWM_P45(uint8_t val);
-void setPWM_P46(uint8_t val);
 
 void setup()
 {
@@ -193,21 +194,16 @@ void receiveEvent(int numBytes)
   case CMD_SET_MOSFET: // Set the mosfet pwm to the recieved value
     setPWM_P44(number);
     break;
-  case CMD_SET_DCMOTOR:
-  { // Set the dc motor bridge to the recieved value and direction
-    uint8_t direction = ReadUInt8(&ptr);
-    if (direction == 0)
-    { // Forward
-      setPWM_P45(number);
-      analogWrite(PIN_MOTEURDC_REVERSE_1, 0);
-    }
-    else
-    { // Reverse
-      setPWM_P45(0);
-      analogWrite(PIN_MOTEURDC_REVERSE_1, number);
-    }
+  case CMD_MOVE_DC_MOTOR:
+    if (number != 1)
+      break;
+    motorDC.moveToLimit(ReadUInt8(&ptr), ReadUInt8(&ptr));
     break;
-  }
+  case CMD_STOP_DC_MOTOR:
+    if (number != 1)
+      break;
+    motorDC.stop();
+    break;
 
   // Request commands
   case CMD_GET_STEPPER:
@@ -285,31 +281,4 @@ void initInPin(int pin)
 {
   pinMode(pin, INPUT_PULLUP);
   return;
-}
-
-// Configure Timer5 for Fast PWM Mode, Non-inverting, No prescaler (PWM Pin 44, 45 and 46)
-void configTMR5() {
-  TCCR5A = (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1) | (1 << WGM51);
-  TCCR5B = (1 << WGM53) | (1 << WGM52) | (1 << CS50);
-  ICR5 = 799; // 20kHz (16MHz / 800 = 20kHz)
-  pinMode(44, OUTPUT);
-  pinMode(45, OUTPUT);
-  pinMode(46, OUTPUT);
-}
-
-// Set PWM for pin 44 (0-255)
-void setPWM_P44(uint8_t val) {
-  OCR5C = map(val, 0, 255, 0, ICR5);
-  pinMode(44, val == 0 ? INPUT : OUTPUT);
-}
-
-// Repeat for pins 45 and 46
-void setPWM_P45(uint8_t val) {
-  OCR5B = map(val, 0, 255, 0, ICR5);
-  pinMode(45, val == 0 ? INPUT : OUTPUT);
-}
-
-void setPWM_P46(uint8_t val) {
-  OCR5A = map(val, 0, 255, 0, ICR5);
-  pinMode(46, val == 0 ? INPUT : OUTPUT);
 }

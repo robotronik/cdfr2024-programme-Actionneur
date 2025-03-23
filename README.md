@@ -54,6 +54,9 @@ The controller supports the following commands:
 | `CMD_MOVE_STEPPER`    | 0x07  | Move a specific stepper motor to a position.  |
 | `CMD_SET_STEPPER`     | 0x08  | Set a stepper motor's current position.       |
 | `CMD_GET_STEPPER`     | 0x09  | Get the current position of a stepper motor.  |
+| `CMD_SET_MOSFET`      | 0x0A  | Set the state of a MOSFET.                    |
+| `CMD_MOVE_DC_MOTOR`   | 0x0B  | Move a specific DC motor to sensor.           |
+| `CMD_STOP_DC_MOTOR`   | 0x0C  | Stop a specific DC motor.                     |
 
 ### Message Structure
 

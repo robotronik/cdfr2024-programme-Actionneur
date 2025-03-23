@@ -120,6 +120,7 @@ void loop()
   for (int i = 0; i < STEPPER_COUNT; i++)
     steppers[i].run();
   led.run();
+  motorDC.run();
 }
 
 void receiveEvent(int numBytes)

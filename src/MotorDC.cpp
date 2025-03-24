@@ -2,12 +2,13 @@
 #include "MotorDC.h"
 #include <Arduino.h>
 
-MotorDC::MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen)
+MotorDC::MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen, int rampTimeMs)
 {
     _fwdPin = fwdPin;
     _revPin = revPin;
     _sensePin = sensePin;
     _normallyOpen = normallyOpen;
+    _rampTimeMs = rampTimeMs;
     pinMode(_fwdPin, OUTPUT);
     pinMode(_revPin, OUTPUT);
     pinMode(_sensePin, INPUT);
@@ -16,14 +17,13 @@ MotorDC::MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen)
 
 void MotorDC::moveToLimit(uint8_t speed, uint8_t holdSpeed)
 {
-    if (state != MotorDC_fsm::STOP)
-        return;
     _holdSpeed = holdSpeed;
+    _speed = speed;
     start_time = millis();
     if (_prevWasForward)
-        reverse(speed);
+        reverse(0);
     else
-        forward(speed);
+        forward(0);
 }
 
 void MotorDC::stop()
@@ -34,18 +34,26 @@ void MotorDC::stop()
 }
 
 void MotorDC::run(){
-    switch(state){
-        case MotorDC_fsm::FORWARD:
-            if (isLimitReached())
-                hold();
-            break;
-        case MotorDC_fsm::REVERSE:
-            if (isLimitReached())
-                hold();
-            break;
-        default:
-            break;
+    if (state == MotorDC_fsm::STOP)
+        return;
+    if (state == MotorDC_fsm::HOLDING)
+        return;
+    if (isLimitReached()){
+        hold();
+        return;
     }
+
+    int elapsed = millis() - start_time;
+    int rampTime = (int)(_speed) * _rampTimeMs / 255;
+    uint8_t speed = _speed;
+    if (elapsed < rampTime)
+        speed = (uint8_t)((int)(_speed) * elapsed / rampTime);
+    
+    if (state == MotorDC_fsm::FORWARD)
+        forward(speed);
+    else if (state == MotorDC_fsm::REVERSE)
+        reverse(speed);
+    
 }
 
 bool MotorDC::isLimitReached()

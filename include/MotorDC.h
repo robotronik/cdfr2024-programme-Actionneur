@@ -16,7 +16,7 @@ enum class MotorDC_fsm
 class MotorDC
 {
 public:
-    MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen, int rampTimeMs);
+    MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen, int rampTimeMs = 800);
     void moveToLimit(uint8_t speed, uint8_t holdSpeed);
     void stop();
     void run();

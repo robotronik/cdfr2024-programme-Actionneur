@@ -49,7 +49,7 @@ servoControl servos[SERVO_COUNT] = {
     servoControl(),
     servoControl()};
 
-MotorDC motorDC(PIN_MOTEURDC_REVERSE_1, PIN_MOTEURDC_FORWARD_1, PIN_SENSOR_8, false);
+MotorDC motorDC(PIN_MOTEURDC_REVERSE_1, PIN_MOTEURDC_FORWARD_1, PIN_SENSOR_8, false, 2500);
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 // int onReceiveDataSize = 0;
@@ -196,10 +196,14 @@ void receiveEvent(int numBytes)
     setPWM_P44(number);
     break;
   case CMD_MOVE_DC_MOTOR:
+  {
     if (number != 1)
       break;
-    motorDC.moveToLimit(ReadUInt8(&ptr), ReadUInt8(&ptr));
+    uint8_t speed = ReadUInt8(&ptr);
+    uint8_t holdSpeed = ReadUInt8(&ptr);
+    motorDC.moveToLimit(speed, holdSpeed);
     break;
+  }
   case CMD_STOP_DC_MOTOR:
     if (number != 1)
       break;

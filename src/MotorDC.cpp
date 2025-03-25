@@ -13,6 +13,7 @@ MotorDC::MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen, int ra
     pinMode(_revPin, OUTPUT);
     pinMode(_sensePin, INPUT);
     state = MotorDC_fsm::STOP;
+    _prevWasForward = true;
 }
 
 void MotorDC::moveToLimit(uint8_t speed, uint8_t holdSpeed)
@@ -43,24 +44,24 @@ void MotorDC::run(){
         return;
     }
 
-    int elapsed = millis() - start_time;
-    int rampTime = (int)(_speed) * _rampTimeMs / 255;
+    unsigned long elapsed = millis() - start_time;
+    unsigned long rampTime = (unsigned long)(_speed) * _rampTimeMs / 255;
     uint8_t speed = _speed;
     if (elapsed < rampTime)
-        speed = (uint8_t)((int)(_speed) * elapsed / rampTime);
+        speed = (uint8_t)(255 * elapsed / _rampTimeMs);
     
     if (state == MotorDC_fsm::FORWARD)
         forward(speed);
-    else if (state == MotorDC_fsm::REVERSE)
+    else
         reverse(speed);
     
 }
 
 bool MotorDC::isLimitReached()
 {
-    if (millis() - start_time < 200)
+    if (millis() - start_time < 800)
         return false;
-    return digitalRead(_sensePin) == (_normallyOpen ? HIGH : LOW);
+    return digitalRead(_sensePin) != _normallyOpen;
 }
 
 void MotorDC::forward(uint8_t speed)
@@ -84,8 +85,7 @@ void MotorDC::hold()
     if (_prevWasForward){
         setPWM(_fwdPin, _holdSpeed);
         digitalWrite(_revPin, LOW);
-    }
-    else{
+    } else {
         setPWM(_fwdPin, 0xFF - _holdSpeed);
         digitalWrite(_revPin, HIGH);
     }

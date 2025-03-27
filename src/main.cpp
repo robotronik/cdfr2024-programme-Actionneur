@@ -82,7 +82,7 @@ void setup()
   initOutPin(PIN_STEPPER_RESET, false);
   delay(1);
   initStepper(steppers[0], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL, PIN_STEPPER_ENABLE_1);
-  initStepper(steppers[1], DEFAULT_MAX_SPEED / 8, DEFAULT_MAX_ACCEL / 8, PIN_STEPPER_ENABLE_2);
+  initStepper(steppers[1], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL, PIN_STEPPER_ENABLE_2);
   initStepper(steppers[2], DEFAULT_MAX_SPEED / 3, DEFAULT_MAX_ACCEL / 3, PIN_STEPPER_ENABLE_3);
   initStepper(steppers[3], DEFAULT_MAX_SPEED / 3, DEFAULT_MAX_ACCEL / 3, PIN_STEPPER_ENABLE_4);
 

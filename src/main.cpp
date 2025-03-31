@@ -49,7 +49,7 @@ servoControl servos[SERVO_COUNT] = {
     servoControl(),
     servoControl()};
 
-MotorDC motorDC(PIN_MOTEURDC_REVERSE_1, PIN_MOTEURDC_FORWARD_1, PIN_SENSOR_8, false, 2500);
+MotorDC motorDC(44, 45, PIN_SENSOR_8, false, 2500);
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 // int onReceiveDataSize = 0;
@@ -91,7 +91,7 @@ void setup()
   // initOutPin(PIN_ACTIONNEUR_1, false);
   // initOutPin(PIN_PWM_LIDAR, true);
   // initOutPin(PIN_MOTEURDC_REVERSE_1, true);
-  initOutPin(PIN_MOTEURDC_FORWARD_1, true);
+  // initOutPin(PIN_MOTEURDC_FORWARD_1, true);
 
   setPWM_P44(0); // PIN_ACTIONNEUR_1
   setPWM_P45(0); // PIN_MOTEURDC_REVERSE_1 15/255:maintient

@@ -30,7 +30,7 @@ void MotorDC::moveToLimit(uint8_t speed, uint8_t holdSpeed)
 void MotorDC::stop()
 {
     setPWM(_fwdPin, 0);
-    digitalWrite(_revPin, LOW);
+    setPWM(_revPin, 0);
     state = MotorDC_fsm::STOP;
 }
 
@@ -67,15 +67,15 @@ bool MotorDC::isLimitReached()
 void MotorDC::forward(uint8_t speed)
 {
     setPWM(_fwdPin, speed);
-    digitalWrite(_revPin, LOW);
+    setPWM(_revPin, 0);
     state = MotorDC_fsm::FORWARD;
     _prevWasForward = true;
 }
 
 void MotorDC::reverse(uint8_t speed)
 {
-    setPWM(_fwdPin, 0xFF - speed);
-    digitalWrite(_revPin, HIGH);
+    setPWM(_fwdPin, 0);
+    setPWM(_revPin, speed);
     state = MotorDC_fsm::REVERSE;
     _prevWasForward = false;
 }
@@ -84,10 +84,10 @@ void MotorDC::hold()
 {
     if (_prevWasForward){
         setPWM(_fwdPin, _holdSpeed);
-        digitalWrite(_revPin, LOW);
+        setPWM(_revPin, 0);
     } else {
-        setPWM(_fwdPin, 0xFF - _holdSpeed);
-        digitalWrite(_revPin, HIGH);
+        setPWM(_fwdPin, 0);
+        setPWM(_revPin, _holdSpeed);
     }
     state = MotorDC_fsm::HOLDING;
 }

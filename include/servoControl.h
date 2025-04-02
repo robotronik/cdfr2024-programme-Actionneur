@@ -15,13 +15,13 @@ private:
     unsigned long move_start_time;
     int start_angle = -1;
     int target_angle;
-    int current_angle = -1;
     bool is_slow_moving = false;
 public:
     servoControl();    
     void target(int val, uint16_t speed);
     void run();
     uint8_t attach(int pin, int min, int max);
+    int current_angle = -1;
     ~servoControl();
 
 private:

@@ -29,6 +29,8 @@
 #define CMD_SET_MOSFET 0x0A
 #define CMD_MOVE_DC_MOTOR 0x0B
 #define CMD_STOP_DC_MOTOR 0x0C
+#define CMD_GET_DC_MOTOR 0x0D
+#define CMD_GET_SERVO 0x0E
 
 RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
 const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6, PIN_SENSOR_7, PIN_SENSOR_8};
@@ -211,6 +213,11 @@ void receiveEvent(int numBytes)
     break;
 
   // Request commands
+  case CMD_GET_SERVO:
+    if (number > SERVO_COUNT || number < 1)
+      break;
+    WriteInt16(&resp_ptr, servos[number - 1].current_angle);
+    break;
   case CMD_GET_STEPPER:
     if (number > STEPPER_COUNT || number < 1)
       break;

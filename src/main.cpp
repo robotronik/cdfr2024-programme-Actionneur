@@ -8,6 +8,7 @@
 #include "RGB_LED.h"
 #include "MotorDC.h"
 #include "timer5PWM.h"
+#include "common/protocol.h"
 
 // Comment this line to disable serial debug
 // #define SERIAL_DEBUG
@@ -16,21 +17,6 @@
 #define SERVO_COUNT 7
 #define STEPPER_COUNT 4
 #define SENSOR_COUNT 8
-
-#define CMD_MOVE_SERVO 0x01
-#define CMD_READ_SENSOR 0x02
-#define CMD_ENABLE_STEPPER 0x03
-#define CMD_DISABLE_STEPPER 0x04
-#define CMD_RGB_LED 0x05
-#define CMD_SET_PWM_LIDAR 0x06
-#define CMD_MOVE_STEPPER 0x07
-#define CMD_SET_STEPPER 0x08
-#define CMD_GET_STEPPER 0x09
-#define CMD_SET_MOSFET 0x0A
-#define CMD_MOVE_DC_MOTOR 0x0B
-#define CMD_STOP_DC_MOTOR 0x0C
-#define CMD_GET_DC_MOTOR 0x0D
-#define CMD_GET_SERVO 0x0E
 
 RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
 const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6, PIN_SENSOR_7, PIN_SENSOR_8};
@@ -90,13 +76,8 @@ void setup()
 
   configTMR5();
 
-  // initOutPin(PIN_ACTIONNEUR_1, false);
-  // initOutPin(PIN_PWM_LIDAR, true);
-  // initOutPin(PIN_MOTEURDC_REVERSE_1, true);
-  // initOutPin(PIN_MOTEURDC_FORWARD_1, true);
-
   setPWM_P44(0); // PIN_ACTIONNEUR_1
-  setPWM_P45(0); // PIN_MOTEURDC_REVERSE_1 15/255:maintient
+  setPWM_P45(0); // PIN_MOTEURDC_REVERSE_1
   setPWM_P46(0); // PIN_PWM_LIDAR
 
   // Enable non-inverting PWM for all channels
@@ -108,7 +89,7 @@ void setup()
     initInPin(sensor_pins[i]);
   }
 
-  Wire.begin(100);
+  Wire.begin(I2C_ADDRESS);
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
@@ -194,9 +175,6 @@ void receiveEvent(int numBytes)
       break;
     steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
     break;
-  case CMD_SET_MOSFET: // Set the mosfet pwm to the recieved value
-    setPWM_P44(number);
-    break;
   case CMD_MOVE_DC_MOTOR:
   {
     if (number != 1)
@@ -213,6 +191,9 @@ void receiveEvent(int numBytes)
     break;
 
   // Request commands
+  case CMD_GET_VERSION:
+    WriteUInt8(&resp_ptr, API_VERSION);
+  break;
   case CMD_GET_SERVO:
     if (number > SERVO_COUNT || number < 1)
       break;

@@ -37,7 +37,7 @@ servoControl servos[SERVO_COUNT] = {
     servoControl(),
     servoControl()};
 
-MotorDC motorDC(44, 45, PIN_SENSOR_8, false, 2500);
+MotorDC motorDC(44, 45, PIN_SENSOR_8, false, 200);
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 // int onReceiveDataSize = 0;
@@ -58,10 +58,10 @@ void setup()
   Serial.println("Starting !");
 #endif
 
-  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 270, 0);
+  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 180);
   initServo(servos[1], PIN_SERVOMOTEUR_2, 20, 140, 140);
   initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 120, 0);
-  initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 180);
+  initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 90);
   initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 270, 0);
   initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 270, 0);
   initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 270, 0);

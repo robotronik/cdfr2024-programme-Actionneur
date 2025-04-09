@@ -58,7 +58,7 @@ void setup()
   Serial.println("Starting !");
 #endif
 
-  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 180);
+  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 110);
   initServo(servos[1], PIN_SERVOMOTEUR_2, 20, 140, 140);
   initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 120, 0);
   initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 90);

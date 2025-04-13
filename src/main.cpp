@@ -37,7 +37,7 @@ servoControl servos[SERVO_COUNT] = {
     servoControl(),
     servoControl()};
 
-MotorDC motorDC(44, 45, PIN_SENSOR_8, false, 200);
+MotorDC motorDC(PIN_MOTEURDC_FORWARD_1, PIN_MOTEURDC_REVERSE_1, PIN_SENSOR_8, false, 200);
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 // int onReceiveDataSize = 0;
@@ -68,6 +68,7 @@ void setup()
 
   initOutPin(PIN_STEPPER_SLEEP, false);
   initOutPin(PIN_STEPPER_RESET, false);
+  initOutPin(PIN_SERVOS_POWER, true);
   delay(1);
   initStepper(steppers[0], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL, PIN_STEPPER_ENABLE_1);
   initStepper(steppers[1], DEFAULT_MAX_SPEED, DEFAULT_MAX_ACCEL, PIN_STEPPER_ENABLE_2);
@@ -76,7 +77,7 @@ void setup()
 
   configTMR5();
 
-  setPWM_P44(0); // PIN_ACTIONNEUR_1
+  setPWM_P44(0); // PIN_MOTEURDC_FORWARD_1
   setPWM_P45(0); // PIN_MOTEURDC_REVERSE_1
   setPWM_P46(0); // PIN_PWM_LIDAR
 
@@ -93,7 +94,6 @@ void setup()
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
-  // current_time = millis();
 }
 
 void loop()
@@ -138,6 +138,11 @@ void receiveEvent(int numBytes)
   uint8_t *resp_ptr = ResponseData; // + ResponseDataSize; // For requests
   switch (command)
   {
+  case CMD_POWER_SERVOS:
+  {
+    bool power = number == 1 ? true : false;
+    digitalWrite(PIN_SERVOS_POWER, power);
+  }
   case CMD_MOVE_SERVO:
   {
     if (number > SERVO_COUNT || number < 1)
@@ -175,6 +180,16 @@ void receiveEvent(int numBytes)
       break;
     steppers[number - 1].setCurrentPosition(ReadInt32(&ptr));
     break;
+  case CMD_SET_STEPPER_SPEED: // Set the stepper speed at the recieved posititon
+  {
+    if (number > STEPPER_COUNT || number < 1)
+      break;
+    int32_t speed = ReadInt32(&ptr);
+    if (speed > 0)
+      steppers[number - 1].setMaxSpeed(speed);
+    else
+      steppers[number - 1].setMaxSpeed(DEFAULT_MAX_SPEED);
+  }
   case CMD_MOVE_DC_MOTOR:
   {
     if (number != 1)

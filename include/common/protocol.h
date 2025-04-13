@@ -1,14 +1,15 @@
 #pragma once
 
-#define API_VERSION 0x01  // API version, increment this when the API changes
+#define API_VERSION 0x02  // API version, increment this when the API changes
 #define API_NAME "Arduino API"
 
 #define I2C_ADDRESS 0x64 // I2C address of the device in hexadecimal
 
 #define CMD_GET_VERSION 0x01
 
-#define CMD_MOVE_SERVO 0x11
-#define CMD_GET_SERVO 0x12
+#define CMD_POWER_SERVOS 0x11
+#define CMD_MOVE_SERVO 0x12
+#define CMD_GET_SERVO 0x13
 
 #define CMD_READ_SENSOR 0x21
 

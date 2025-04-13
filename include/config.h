@@ -4,6 +4,9 @@
 
 #define BUFFERONRECEIVESIZE 32
 
+// Pin that enables the 5V power supply for the servos
+#define PIN_SERVOS_POWER 14
+
 //Pin Servo moteur
 #define PIN_SERVOMOTEUR_1 7
 #define PIN_SERVOMOTEUR_2 6
@@ -32,12 +35,9 @@
 #define PIN_STEPPER_DIR_4 29
 #define PIN_STEPPER_ENABLE_4 31
 
-//Pin Actionneur
-#define PIN_ACTIONNEUR_1 44
-
 // DC Motor Pins
 #define PIN_MOTEURDC_REVERSE_1 45
-#define PIN_MOTEURDC_FORWARD_1 12
+#define PIN_MOTEURDC_FORWARD_1 44
 
 // Sensor Pins
 #define PIN_SENSOR_1 32

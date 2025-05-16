@@ -11,17 +11,17 @@ private:
     int maxVal = 180;
 
     // Variables to handle slow movement
-    uint32_t move_time = 300; // time of servo movement in milli seconds
+    uint32_t move_time;
     unsigned long move_start_time;
-    int start_angle = -1;
+    int start_angle;
     int target_angle;
-    bool is_slow_moving = false;
+    bool is_slow_moving;
 public:
     servoControl();    
     void target(int val, uint16_t speed);
     void run();
     uint8_t attach(int pin, int min, int max);
-    int current_angle = -1;
+    int current_angle;
     ~servoControl();
 
 private:

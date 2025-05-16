@@ -5,6 +5,10 @@
 
 servoControl::servoControl()
 {
+    start_angle = -1;
+    is_slow_moving = false;
+    move_time = 300;
+    current_angle = -1;
 }
 
 // Speed in deg/s
@@ -17,6 +21,7 @@ void servoControl::target(int val, uint16_t speed)
         val = maxVal;
     if (speed == 0 || current_angle == -1)
     {
+        is_slow_moving = false;
         write(val);
     }
     else

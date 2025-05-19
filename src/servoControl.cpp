@@ -41,8 +41,12 @@ void servoControl::write(int val)
     int pulse = map(val, 0, 180, MIN_PULSE, MAX_PULSE);
     servo.writeMicroseconds(pulse);
     // servo.write(val);
-    
-    // Serial.println(val);
+#ifdef SERIAL_DEBUG
+    Serial.print("Servo #");
+    Serial.print(_ID);
+    Serial.print(" set ");
+    Serial.println(val);
+#endif
 }
 
 void servoControl::run(void)
@@ -65,12 +69,17 @@ void servoControl::run(void)
     }
 }
 
-uint8_t servoControl::attach(int pin, int min, int max)
+uint8_t servoControl::attach(int pin, int min, int max, int ID)
 {
     minVal = min;
     maxVal = max;
     int min_pulse = map(min, 0, 180, MIN_PULSE, MAX_PULSE);
     int max_pulse = map(max, 0, 180, MIN_PULSE, MAX_PULSE);
+    start_angle = -1;
+    is_slow_moving = false;
+    move_time = 300;
+    current_angle = -1;
+    _ID = ID;
     return servo.attach(pin, min_pulse, max_pulse);
 }
 

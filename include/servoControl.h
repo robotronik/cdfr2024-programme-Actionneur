@@ -16,11 +16,13 @@ private:
     int start_angle;
     int target_angle;
     bool is_slow_moving;
+
+    int _ID;
 public:
     servoControl();    
     void target(int val, uint16_t speed);
     void run();
-    uint8_t attach(int pin, int min, int max);
+    uint8_t attach(int pin, int min, int max, int ID);
     int current_angle;
     ~servoControl();
 

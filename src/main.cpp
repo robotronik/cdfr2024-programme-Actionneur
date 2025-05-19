@@ -46,7 +46,7 @@ int ResponseDataSize = 0;
 
 void receiveEvent(int numBytes);
 void requestEvent();
-void initServo(servoControl &servo, int pin, int min, int max, int initialPos);
+void initServo(servoControl &servo, int ID, int pin, int min, int max, int initialPos);
 void initStepper(AccelStepper &stepper, int maxSpeed, int Accel, int enablePin);
 void initOutPin(int pin, bool low);
 void initInPin(int pin);
@@ -58,13 +58,13 @@ void setup()
   Serial.println("Starting !");
 #endif
 
-  initServo(servos[0], PIN_SERVOMOTEUR_1, 0, 180, 130);
-  initServo(servos[1], PIN_SERVOMOTEUR_2, 0, 180, 180);
-  initServo(servos[2], PIN_SERVOMOTEUR_3, 0, 180, 0);
-  initServo(servos[3], PIN_SERVOMOTEUR_4, 0, 180, 90);
-  initServo(servos[4], PIN_SERVOMOTEUR_5, 0, 270, 0);
-  initServo(servos[5], PIN_SERVOMOTEUR_6, 0, 270, 0);
-  initServo(servos[6], PIN_SERVOMOTEUR_7, 0, 270, 0);
+  initServo(servos[0], 1, PIN_SERVOMOTEUR_1, 0, 180, 130);
+  initServo(servos[1], 2, PIN_SERVOMOTEUR_2, 0, 180, 180);
+  initServo(servos[2], 3, PIN_SERVOMOTEUR_3, 0, 180, 0);
+  initServo(servos[3], 4, PIN_SERVOMOTEUR_4, 0, 180, 90);
+  initServo(servos[4], 5, PIN_SERVOMOTEUR_5, 0, 270, 0);
+  initServo(servos[5], 6, PIN_SERVOMOTEUR_6, 0, 270, 0);
+  initServo(servos[6], 7, PIN_SERVOMOTEUR_7, 0, 270, 0);
 
   initOutPin(PIN_STEPPER_SLEEP, false);
   initOutPin(PIN_STEPPER_RESET, false);
@@ -115,6 +115,7 @@ void receiveEvent(int numBytes)
   // onReceiveDataSize += numBytes;
 
 #ifdef SERIAL_DEBUG
+/*
   Serial.print("Received: 0x ");
   for (int i = 0; i < numBytes; i++)
   {
@@ -122,6 +123,7 @@ void receiveEvent(int numBytes)
     Serial.print(" ");
   }
   Serial.println();
+  */
 #endif
 
   uint8_t *ptr = onReceiveData;
@@ -129,10 +131,12 @@ void receiveEvent(int numBytes)
   uint8_t number = ReadUInt8(&ptr);
 
 #ifdef SERIAL_DEBUG
+/*
   Serial.print("Command: ");
   Serial.println(command, HEX);
   Serial.print("Number: ");
   Serial.println(number);
+  */
 #endif
 
   uint8_t *resp_ptr = ResponseData; // + ResponseDataSize; // For requests
@@ -240,6 +244,7 @@ void receiveEvent(int numBytes)
 void requestEvent()
 {
 #ifdef SERIAL_DEBUG
+/*
   Serial.print("Request ! Sending: 0x ");
   for (int i = 0; i < ResponseDataSize; i++)
   {
@@ -255,15 +260,16 @@ void requestEvent()
     long val = ReadInt32(&ptr);
     Serial.println(val);
   }
+    */
 #endif
 
   Wire.write(ResponseData, ResponseDataSize);
   ResponseDataSize = 0;
 }
 
-void initServo(servoControl &servo, int pin, int min, int max, int initialPos)
+void initServo(servoControl &servo, int ID, int pin, int min, int max, int initialPos)
 {
-  servo.attach(pin, min, max);
+  servo.attach(pin, min, max, ID);
   servo.target(initialPos, 0);
   return;
 }

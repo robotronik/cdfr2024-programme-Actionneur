@@ -146,6 +146,7 @@ void receiveEvent(int numBytes)
   {
     bool power = number == 1 ? true : false;
     digitalWrite(PIN_SERVOS_POWER, power);
+    break;
   }
   case CMD_MOVE_SERVO:
   {

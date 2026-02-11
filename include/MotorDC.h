@@ -9,32 +9,23 @@ enum class MotorDC_fsm
 {
     STOP = 0,
     FORWARD = 1,
-    REVERSE = 2,
-    HOLDING = 3
+    REVERSE = 2
 };
 
 class MotorDC
 {
 public:
-    MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen, int rampTimeMs = 800);
-    void moveToLimit(uint8_t speed, uint8_t holdSpeed);
+    MotorDC(int fwdPin, int revPin);
+    void moveSpeed(uint8_t speed, bool is_forward);
     void stop();
     void run();
 
-    unsigned long start_time;
     MotorDC_fsm state;
 
 private:
     int _fwdPin;
     int _revPin;
-    int _sensePin;
-    bool _normallyOpen;
-    bool _prevWasForward;
-    int _rampTimeMs;
-    uint8_t _speed;
-    uint8_t _holdSpeed;
+
     void forward(uint8_t speed);
     void reverse(uint8_t speed);
-    void hold();
-    bool isLimitReached();
 };

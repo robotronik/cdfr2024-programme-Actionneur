@@ -2,29 +2,23 @@
 #include "MotorDC.h"
 #include <Arduino.h>
 
-MotorDC::MotorDC(int fwdPin, int revPin, int sensePin, bool normallyOpen, int rampTimeMs)
+extern const int* sensor_pins;
+
+MotorDC::MotorDC(int fwdPin, int revPin)
 {
     _fwdPin = fwdPin;
     _revPin = revPin;
-    _sensePin = sensePin;
-    _normallyOpen = normallyOpen;
-    _rampTimeMs = rampTimeMs;
     pinMode(_fwdPin, OUTPUT);
     pinMode(_revPin, OUTPUT);
-    pinMode(_sensePin, INPUT);
     state = MotorDC_fsm::STOP;
-    _prevWasForward = true;
 }
 
-void MotorDC::moveToLimit(uint8_t speed, uint8_t holdSpeed)
+void MotorDC::moveSpeed(uint8_t speed, bool is_forward)
 {
-    _holdSpeed = holdSpeed;
-    _speed = speed;
-    start_time = millis();
-    if (_prevWasForward)
-        reverse(0);
+    if (is_forward)
+        forward(speed);
     else
-        forward(0);
+        reverse(speed);
 }
 
 void MotorDC::stop()
@@ -37,39 +31,14 @@ void MotorDC::stop()
 void MotorDC::run(){
     if (state == MotorDC_fsm::STOP)
         return;
-    if (state == MotorDC_fsm::HOLDING)
-        return;
-    if (isLimitReached()){
-        hold();
-        return;
-    }
-
-    unsigned long elapsed = millis() - start_time;
-    unsigned long rampTime = (unsigned long)(_speed) * _rampTimeMs / 255;
-    uint8_t speed = _speed;
-    if (elapsed < rampTime)
-        speed = (uint8_t)(255 * elapsed / _rampTimeMs);
-    
-    if (state == MotorDC_fsm::FORWARD)
-        forward(speed);
-    else
-        reverse(speed);
+    return;
     
 }
-
-bool MotorDC::isLimitReached()
-{
-    if (millis() - start_time < 800)
-        return false;
-    return digitalRead(_sensePin) != _normallyOpen;
-}
-
 void MotorDC::forward(uint8_t speed)
 {
     setPWM(_fwdPin, speed);
     setPWM(_revPin, 0);
     state = MotorDC_fsm::FORWARD;
-    _prevWasForward = true;
 }
 
 void MotorDC::reverse(uint8_t speed)
@@ -77,17 +46,4 @@ void MotorDC::reverse(uint8_t speed)
     setPWM(_fwdPin, 0);
     setPWM(_revPin, speed);
     state = MotorDC_fsm::REVERSE;
-    _prevWasForward = false;
-}
-
-void MotorDC::hold()
-{
-    if (_prevWasForward){
-        setPWM(_fwdPin, _holdSpeed);
-        setPWM(_revPin, 0);
-    } else {
-        setPWM(_fwdPin, 0);
-        setPWM(_revPin, _holdSpeed);
-    }
-    state = MotorDC_fsm::HOLDING;
 }

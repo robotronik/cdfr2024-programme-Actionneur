@@ -37,7 +37,7 @@ servoControl servos[SERVO_COUNT] = {
     servoControl(),
     servoControl()};
 
-MotorDC motorDC(PIN_MOTEURDC_FORWARD_1, PIN_MOTEURDC_REVERSE_1, PIN_SENSOR_8, false, 200);
+MotorDC motorDC(PIN_MOTEURDC_FORWARD_1, PIN_MOTEURDC_REVERSE_1);
 
 uint8_t onReceiveData[BUFFERONRECEIVESIZE];
 // int onReceiveDataSize = 0;
@@ -200,8 +200,8 @@ void receiveEvent(int numBytes)
     if (number != 1)
       break;
     uint8_t speed = ReadUInt8(&ptr);
-    uint8_t holdSpeed = ReadUInt8(&ptr);
-    motorDC.moveToLimit(speed, holdSpeed);
+    uint8_t is_forward = ReadUInt8(&ptr);
+    motorDC.moveSpeed(speed, is_forward);
     break;
   }
   case CMD_STOP_DC_MOTOR:

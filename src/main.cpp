@@ -16,10 +16,10 @@
 // TODO: move these defines later
 #define SERVO_COUNT 7
 #define STEPPER_COUNT 4
-#define SENSOR_COUNT 8
+#define SENSOR_COUNT 7
 
 RGB_LED led(PIN_LED_1_R, PIN_LED_1_G, PIN_LED_1_B);
-const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6, PIN_SENSOR_7, PIN_SENSOR_8};
+const int sensor_pins[SENSOR_COUNT] = {PIN_SENSOR_1, PIN_SENSOR_2, PIN_SENSOR_3, PIN_SENSOR_4, PIN_SENSOR_5, PIN_SENSOR_6, PIN_SENSOR_7};
 
 AccelStepper steppers[STEPPER_COUNT] = {
     {AccelStepper::DRIVER, PIN_STEPPER_STEP_1, PIN_STEPPER_DIR_1, PIN_STEPPER_ENABLE_1},
@@ -65,6 +65,9 @@ void setup()
   initServo(servos[4], 5, PIN_SERVOMOTEUR_5, 0, 180, 90);
   initServo(servos[5], 6, PIN_SERVOMOTEUR_6, 0, 180, 90); //réel : 270°
   initServo(servos[6], 7, PIN_SERVOMOTEUR_7, 0, 180, 90); //réel : 270°
+
+  //Pompe
+  initOutPin(PIN_SENSOR_8, false); // false → HIGH → pompe OFF
 
   initOutPin(PIN_STEPPER_SLEEP, false);
   initOutPin(PIN_STEPPER_RESET, false);
@@ -233,6 +236,14 @@ void receiveEvent(int numBytes)
       break;
     WriteUInt8(&resp_ptr, !digitalRead(sensor_pins[number - 1]));
     break;
+  case CMD_WRITE_PIN:{
+      if (number != 1) break;
+      uint8_t state = ReadUInt8(&ptr);
+  
+      if (state) digitalWrite(PIN_SENSOR_8, LOW);   // ON
+      else digitalWrite(PIN_SENSOR_8, HIGH);  // OFF
+      break;
+    }
   default:
     break;
   }

@@ -59,12 +59,12 @@ void setup()
 #endif
 
   initServo(servos[0], 1, PIN_SERVOMOTEUR_1, 0, 180, 90);
-  initServo(servos[1], 2, PIN_SERVOMOTEUR_2, 0, 180, 90); //réel : 270°
-  initServo(servos[2], 3, PIN_SERVOMOTEUR_3, 0, 180, 90); //réel : 270°
+  initServo(servos[1], 2, PIN_SERVOMOTEUR_2, 0, 180, 90);
+  initServo(servos[2], 3, PIN_SERVOMOTEUR_3, 0, 180, 90);
   initServo(servos[3], 4, PIN_SERVOMOTEUR_4, 0, 180, 90);
   initServo(servos[4], 5, PIN_SERVOMOTEUR_5, 0, 180, 90);
-  initServo(servos[5], 6, PIN_SERVOMOTEUR_6, 0, 180, 90); //réel : 270°
-  initServo(servos[6], 7, PIN_SERVOMOTEUR_7, 0, 180, 90); //réel : 270°
+  initServo(servos[5], 6, PIN_SERVOMOTEUR_6, 0, 180, 180); //réel : 270°
+  initServo(servos[6], 7, PIN_SERVOMOTEUR_7, 0, 180, 0); //réel : 270°
 
   //Pompe
   initOutPin(PIN_SENSOR_8, false); // false → HIGH → pompe OFF

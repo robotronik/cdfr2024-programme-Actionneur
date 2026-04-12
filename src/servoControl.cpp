@@ -3,12 +3,35 @@
 #define MIN_PULSE 500
 #define MAX_PULSE 2500
 
+Adafruit_PWMServoDriver servoControl::pca = Adafruit_PWMServoDriver();
+bool servoControl::pcaInitialized = false;
+uint8_t servoControl::pcaAddress = 0x40;
+uint16_t servoControl::pcaFrequency = 50;
+
 servoControl::servoControl()
 {
+    channel = 0;
     start_angle = -1;
     is_slow_moving = false;
     move_time = 300;
     current_angle = -1;
+}
+
+bool servoControl::beginPCA9685(uint8_t address, uint16_t frequency)
+{
+    pcaAddress = address;
+    pcaFrequency = frequency;
+    pca = Adafruit_PWMServoDriver(pcaAddress);
+    if (!pca.begin())
+    {
+        pcaInitialized = false;
+        return false;
+    }
+
+    pca.setPWMFreq(pcaFrequency);
+    delay(10);
+    pcaInitialized = true;
+    return true;
 }
 
 // Speed in deg/s
@@ -37,13 +60,16 @@ void servoControl::target(int val, uint16_t speed)
 
 void servoControl::write(int val)
 {
+    if (!pcaInitialized)
+        return;
+
     current_angle = val;
-    int pulse = map(val, 0, 180, MIN_PULSE, MAX_PULSE);
-    servo.writeMicroseconds(pulse);
-    // servo.write(val);
+    int pulse_us = map(val, 0, 180, MIN_PULSE, MAX_PULSE);
+    uint16_t pulse_ticks = (uint32_t)pulse_us * pcaFrequency * 4096UL / 1000000UL;
+    pca.setPWM(channel, 0, pulse_ticks);
 #ifdef SERIAL_DEBUG
-    Serial.print("Servo #");
-    Serial.print(_ID);
+    Serial.print("Servo channel #");
+    Serial.print(channel);
     Serial.print(" set ");
     Serial.println(val);
 #endif
@@ -69,18 +95,16 @@ void servoControl::run(void)
     }
 }
 
-uint8_t servoControl::attach(int pin, int min, int max, int ID)
+uint8_t servoControl::attach(int pca_channel, int min, int max)
 {
     minVal = min;
     maxVal = max;
-    int min_pulse = map(min, 0, 180, MIN_PULSE, MAX_PULSE);
-    int max_pulse = map(max, 0, 180, MIN_PULSE, MAX_PULSE);
     start_angle = -1;
     is_slow_moving = false;
     move_time = 300;
     current_angle = -1;
-    _ID = ID;
-    return servo.attach(pin, min_pulse, max_pulse);
+    channel = (uint8_t)pca_channel;
+    return (pcaInitialized && channel < 16) ? 1 : 0;
 }
 
 servoControl::~servoControl()

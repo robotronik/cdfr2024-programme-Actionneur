@@ -7,14 +7,16 @@
 // Pin that enables the 5V power supply for the servos
 #define PIN_SERVOS_POWER 14
 
-//Pin Servo moteur
-#define PIN_SERVOMOTEUR_1 7
-#define PIN_SERVOMOTEUR_2 6
-#define PIN_SERVOMOTEUR_3 9
-#define PIN_SERVOMOTEUR_4 8
-#define PIN_SERVOMOTEUR_5 11
-#define PIN_SERVOMOTEUR_6 10
-#define PIN_SERVOMOTEUR_7 13
+// PCA9685 configuration
+#define PCA9685_I2C_ADDRESS 0x40
+#define PCA9685_PWM_FREQUENCY 50
+#define PCA9685_SERVO_CHANNEL_1 0
+#define PCA9685_SERVO_CHANNEL_2 1
+#define PCA9685_SERVO_CHANNEL_3 2
+#define PCA9685_SERVO_CHANNEL_4 3
+#define PCA9685_SERVO_CHANNEL_5 4
+#define PCA9685_SERVO_CHANNEL_6 5
+#define PCA9685_SERVO_CHANNEL_7 6
 
 //Pin Moteur pas a pas VALEUR HAUTE 2200 avec Microstep 1/8
 #define PIN_STEPPER_SLEEP 22

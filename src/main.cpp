@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
-#include <Servo.h>
 #include <Wire.h>
 #include "config.h"
 #include "utils.h"
@@ -13,8 +12,12 @@
 // Comment this line to disable serial debug
 // #define SERIAL_DEBUG
 
+// Set to 1 while validating PCA9685 in standalone I2C master mode.
+#define PCA9685_MASTER_TEST_MODE 1
+#define SERVO_SWEEP_TEST_MODE 1
+
 // TODO: move these defines later
-#define SERVO_COUNT 7
+#define SERVO_COUNT 16
 #define STEPPER_COUNT 4
 #define SENSOR_COUNT 7
 
@@ -28,14 +31,7 @@ AccelStepper steppers[STEPPER_COUNT] = {
     {AccelStepper::DRIVER, PIN_STEPPER_STEP_4, PIN_STEPPER_DIR_4, PIN_STEPPER_ENABLE_4},
 };
 
-servoControl servos[SERVO_COUNT] = {
-    servoControl(),
-    servoControl(),
-    servoControl(),
-    servoControl(),
-    servoControl(),
-    servoControl(),
-    servoControl()};
+servoControl servos[SERVO_COUNT];
 
 MotorDC motorDC(PIN_MOTEURDC_FORWARD_1, PIN_MOTEURDC_REVERSE_1);
 
@@ -46,10 +42,14 @@ int ResponseDataSize = 0;
 
 void receiveEvent(int numBytes);
 void requestEvent();
-void initServo(servoControl &servo, int ID, int pin, int min, int max, int initialPos);
+void initServo(servoControl &servo, int pin, int min, int max, int initialPos);
 void initStepper(AccelStepper &stepper, int maxSpeed, int Accel, int enablePin);
 void initOutPin(int pin, bool low);
 void initInPin(int pin);
+bool pca9685WriteRegister(uint8_t reg, uint8_t value);
+bool pca9685WriteChannelRaw(uint8_t channel, uint16_t on_ticks, uint16_t off_ticks);
+void runPCA9685MasterModeTest();
+void runServoSweepTest();
 
 void setup()
 {
@@ -58,13 +58,14 @@ void setup()
   Serial.println("Starting !");
 #endif
 
-  initServo(servos[0], 1, PIN_SERVOMOTEUR_1, 0, 180, 90);
-  initServo(servos[1], 2, PIN_SERVOMOTEUR_2, 0, 180, 90);
-  initServo(servos[2], 3, PIN_SERVOMOTEUR_3, 0, 180, 90);
-  initServo(servos[3], 4, PIN_SERVOMOTEUR_4, 0, 180, 90);
-  initServo(servos[4], 5, PIN_SERVOMOTEUR_5, 0, 180, 90);
-  initServo(servos[5], 6, PIN_SERVOMOTEUR_6, 0, 180, 90); //réel : 270°
-  initServo(servos[6], 7, PIN_SERVOMOTEUR_7, 0, 180, 180); //réel : 270°
+  // Temporarily repurpose the firmware to I2C master mode for PCA9685 bring-up.
+  runPCA9685MasterModeTest();
+  servoControl::beginPCA9685(PCA9685_I2C_ADDRESS, PCA9685_PWM_FREQUENCY);
+
+  for (int i = 0; i < SERVO_COUNT; i++)
+  {
+    initServo(servos[i], i, 0, 180, 90);
+  }
 
   //Pompe
   initOutPin(PIN_SENSOR_8, false); // false → HIGH → pompe OFF
@@ -93,14 +94,20 @@ void setup()
     initInPin(sensor_pins[i]);
   }
 
+#if !PCA9685_MASTER_TEST_MODE
   Wire.begin(I2C_ADDRESS);
   Wire.setTimeout(1000);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
+#endif
 }
 
 void loop()
 {
+#if SERVO_SWEEP_TEST_MODE
+  runServoSweepTest();
+#endif
+
   for (int i = 0; i < SERVO_COUNT; i++)
     servos[i].run();
   for (int i = 0; i < STEPPER_COUNT; i++)
@@ -279,9 +286,9 @@ void requestEvent()
   ResponseDataSize = 0;
 }
 
-void initServo(servoControl &servo, int ID, int pin, int min, int max, int initialPos)
+void initServo(servoControl &servo, int pin, int min, int max, int initialPos)
 {
-  servo.attach(pin, min, max, ID);
+  servo.attach(pin, min, max);
   servo.target(initialPos, 0);
   return;
 }
@@ -307,4 +314,73 @@ void initInPin(int pin)
 {
   pinMode(pin, INPUT_PULLUP);
   return;
+}
+
+bool pca9685WriteRegister(uint8_t reg, uint8_t value)
+{
+  Wire.beginTransmission(PCA9685_I2C_ADDRESS);
+  Wire.write(reg);
+  Wire.write(value);
+  return Wire.endTransmission() == 0;
+}
+
+bool pca9685WriteChannelRaw(uint8_t channel, uint16_t on_ticks, uint16_t off_ticks)
+{
+  if (channel > 15)
+    return false;
+
+  const uint8_t base = 0x06 + 4 * channel;
+  Wire.beginTransmission(PCA9685_I2C_ADDRESS);
+  Wire.write(base);
+  Wire.write(on_ticks & 0xFF);
+  Wire.write((on_ticks >> 8) & 0x0F);
+  Wire.write(off_ticks & 0xFF);
+  Wire.write((off_ticks >> 8) & 0x0F);
+  return Wire.endTransmission() == 0;
+}
+
+void runPCA9685MasterModeTest()
+{
+  Wire.begin();
+  Wire.setClock(100000);
+  Wire.setTimeout(1000);
+
+  // Basic bring-up instructions to verify write access to the PCA9685.
+  pca9685WriteRegister(0x00, 0x00); // MODE1: normal mode, internal oscillator
+  pca9685WriteRegister(0x01, 0x04); // MODE2: totem-pole output driver
+  pca9685WriteChannelRaw(PCA9685_SERVO_CHANNEL_1, 0, 307); // ~1.5ms pulse at 50Hz
+}
+
+void runServoSweepTest()
+{
+  static bool initialized = false;
+  static bool go_right = true;
+  static unsigned long last_toggle_ms = 0;
+  const unsigned long interval_ms = 1500;
+
+  if (!initialized)
+  {
+    servos[0].target(0, 0);
+    servos[1].target(180, 0);
+    initialized = true;
+    last_toggle_ms = millis();
+    return;
+  }
+
+  if (millis() - last_toggle_ms < interval_ms)
+    return;
+
+  if (go_right)
+  {
+    servos[0].target(180, 300);
+    servos[1].target(0, 180);
+  }
+  else
+  {
+    servos[0].target(0, 180);
+    servos[1].target(180, 300);
+  }
+
+  go_right = !go_right;
+  last_toggle_ms = millis();
 }

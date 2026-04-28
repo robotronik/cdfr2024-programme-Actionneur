@@ -11,28 +11,60 @@ MotorDC::MotorDC(int fwdPin, int revPin)
     pinMode(_fwdPin, OUTPUT);
     pinMode(_revPin, OUTPUT);
     state = MotorDC_fsm::STOP;
+    
+    // Initialize soft start parameters
+    _targetSpeed = 0;
+    _currentSpeed = 0;
+    _rampRate = 1;  // Default: 1 speed unit per run() call (~51ms per 255 units)
+    _isForward = true;
 }
 
 void MotorDC::moveSpeed(uint8_t speed, bool is_forward)
 {
-    if (is_forward)
-        forward(speed);
-    else
-        reverse(speed);
+    _targetSpeed = speed;
+    _isForward = is_forward;
 }
 
 void MotorDC::stop()
 {
-    setPWM(_fwdPin, 0);
-    setPWM(_revPin, 0);
-    state = MotorDC_fsm::STOP;
+    _targetSpeed = 0;
 }
 
 void MotorDC::run(){
-    if (state == MotorDC_fsm::STOP)
-        return;
-    return;
+    // Ramp current speed towards target speed
+    if (_currentSpeed < _targetSpeed) {
+        // Ramp up
+        _currentSpeed = (_currentSpeed + _rampRate <= _targetSpeed) 
+                        ? _currentSpeed + _rampRate 
+                        : _targetSpeed;
+    } else if (_currentSpeed > _targetSpeed) {
+        // Ramp down
+        _currentSpeed = (_currentSpeed - _rampRate >= _targetSpeed) 
+                        ? _currentSpeed - _rampRate 
+                        : _targetSpeed;
+    }
     
+    // Apply ramped speed to motor
+    if (_currentSpeed > 0) {
+        if (_isForward) {
+            setPWM(_fwdPin, _currentSpeed);
+            setPWM(_revPin, 0);
+            state = MotorDC_fsm::FORWARD;
+        } else {
+            setPWM(_fwdPin, 0);
+            setPWM(_revPin, _currentSpeed);
+            state = MotorDC_fsm::REVERSE;
+        }
+    } else {
+        setPWM(_fwdPin, 0);
+        setPWM(_revPin, 0);
+        state = MotorDC_fsm::STOP;
+    }
+}
+
+void MotorDC::setRampRate(uint8_t rate)
+{
+    _rampRate = rate;
 }
 void MotorDC::forward(uint8_t speed)
 {
